@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="sampleposdet" VERSION="1">
+<Strings Encoding="ISOLATIN1">
+	<STRING Id="1" Name="IDS_MODE_ONE_SHOT">
+		<Text>One Shot</Text>
+	</STRING>
+	<STRING Id="2" Name="IDS_MODE_TRACK_LOCAL">
+		<Text>Track Local</Text>
+	</STRING>
+	<STRING Id="3" Name="IDS_MODE_TRACK_NETWORK">
+		<Text>Track Network</Text>
+	</STRING>
+	<STRING Id="5" Name="IDS_MAIN_TITLE">
+		<Text>GetGpsInfo</Text>
+	</STRING>
+	<STRING Id="6" Name="IDS_MODE_TRACK_SMART">
+		<Text>Auto Tracking</Text>
+	</STRING>
+	<STRING Id="1001" Name="IDS_CONFIG">
+		<Text>Configure...</Text>
+	</STRING>
+	<STRING Id="1002" Name="IDS_CONFIG_TITLE">
+		<Text>Configure Options</Text>
+	</STRING>
+	<STRING Id="1003" Name="IDS_CONFIG_PDE">
+		<Text>PDE IP Address</Text>
+	</STRING>
+	<STRING Id="1004" Name="IDS_CONFIG_QOS">
+		<Text>QoS Settings</Text>
+	</STRING>
+	<STRING Id="1005" Name="IDS_PDE_SETTINGS_TITLE">
+		<Text>PDE Server IP Address</Text>
+	</STRING>
+	<STRING Id="1006" Name="IDS_SOFTKEY_SAVE">
+		<Text>Save</Text>
+	</STRING>
+	<STRING Id="1007" Name="IDS_PORT_SETTINGS_TITLE">
+		<Text>Port Number</Text>
+	</STRING>
+	<STRING Id="1008" Name="IDS_CONFIG_OPT">
+		<Text>Optimization Type</Text>
+	</STRING>
+	<STRING Id="1009" Name="IDS_OPT_NONE">
+		<Text>AEEGPS_OPT_NONE</Text>
+	</STRING>
+	<STRING Id="1010" Name="IDS_OPT_SPEED">
+		<Text>AEEGPS_OPT_SPEED</Text>
+	</STRING>
+	<STRING Id="1011" Name="IDS_OPT_ACCURACY">
+		<Text>AEEGPS_OPT_ACCURACY</Text>
+	</STRING>
+	<STRING Id="1012" Name="IDS_OPT_PAYLOAD">
+		<Text>AEEGPS_OPT_PAYLOAD</Text>
+	</STRING>
+	<STRING Id="1013" Name="IDS_OPT_DEFAULT">
+		<Text>AEEGPS_OPT_DEFAULT</Text>
+	</STRING>
+	<STRING Id="1014" Name="IDS_PDE_SETTINGS_INVALID">
+		<Text>Invalid Address!</Text>
+	</STRING>
+	<STRING Id="1015" Name="IDS_PORT_SETTINGS_INVALID">
+		<Text>Invalid Port!</Text>
+	</STRING>
+	<STRING Id="1016" Name="IDS_OPT_SETTINGS_TITLE">
+		<Text>Optimization Type</Text>
+	</STRING>
+	<STRING Id="1017" Name="IDS_QOS_SETTINGS_TITLE">
+		<Text>QoS Value (0-255)</Text>
+	</STRING>
+	<STRING Id="1018" Name="IDS_QOS_SETTINGS_INVALID">
+		<Text>Invalid Value!</Text>
+	</STRING>
+	<STRING Id="1019" Name="IDS_CONFIG_FILE_LEGEND">
+		<Text>// CONFIGURATION SETTINGS
+//
+// GPS_OPTIMIZATION_MODE:
+//	1 - AEEGPS_OPT_SPEED
+//	2 - AEEGPS_OPT_ACCURACY
+// GPS_QOS:
+//	1-255 are valid values
+// GPS_SERVER_TYPE:
+//	0 - AEEGPS_SERVER_DEFAULT
+//	1 - AEEGPS_SERVER_IP
+//	2 - AEEGPS_SERVER_DBURST
+// GPS_SERVER_IP:
+//	Specify IP address in x.y.z.w notation
+// GPS_SERVER_PORT:
+//	Specify the port number for the PDE server
+</Text>
+	</STRING>
+	<STRING Id="1020" Name="IDS_CONFIG_SERVER">
+		<Text>PDE Server</Text>
+	</STRING>
+	<STRING Id="1021" Name="IDS_CONFIG_SERVER_DEFAULT">
+		<Text>Use Default Setting</Text>
+	</STRING>
+	<STRING Id="1022" Name="IDS_CONFIG_SERVER_IP">
+		<Text>Specify IP Address and Port</Text>
+	</STRING>
+</Strings>
+</BREWRes>
