@@ -1,0 +1,232 @@
+###########################################################################
+###########################################################################
+### 
+### BRC (BREW Resource Compiler) File
+### ---------------------------------
+### Each line of a BREW Resource Compiler input file has the form:
+### 
+###    <type> <id> <id_name> {data}
+### 
+### Where:
+###    type    = STRING, IMAGE, and BLOB currently supported
+###    id      = an integer id for the resource
+###    id_name = a symbolic, legal-C-preprocessor token name for use in
+###                the resource header, for "#define XX <id>"
+###    {data}  = for STRING: <type> <SP> <quoted-text>
+###               where <type> is one of: ISOLATIN1, SJIS,
+###                  GB3212 (or EUC_CN), KSC5601 (or EUC_KR), or UTF8
+###              for IMAGE and BLOB: <mimetype> <SP> @<filename>
+###                              or: <mimetype> <SP> <quoted-text>
+### 
+### Notes:
+###    * IMAGE and BLOB resources must have mutually unique ids.
+###    * Only single-byte string formats are supported.
+###    * Lines beginning with '#' are treated as comments.
+###    * STRING resources may contain escape chars \r, \n, \t and octal 
+###       numbers to include a ", use \" (just like C)
+### 
+### Examples:
+### 
+### # an ISOLATIN1 string
+### IDS_HI          1   STRING    ISOLATIN1 "hi"
+### 
+### # a bitmap image
+### IDB_HI        101   IMAGE     "image/bmp" @"hi.bmp"
+### 
+### # an html page
+### IDX_HI        201   BLOB      "text/html" @"hi.html"
+### 
+### # an html page inline
+### IDX_INLHI     202   BLOB      "text/html" "<html>hi</html>"
+##############################################################################
+###########################################################################
+
+###########################################################################
+# BREWser strings, config values start at 100, rest start at 1
+###########################################################################
+#
+# config defaults 
+#
+IDS_DEFHOMEPAGE        100 STRING ISOLATIN1 "res:/brewser.bar?2000"
+IDS_DEFMAILTO          101 STRING ISOLATIN1 "http://brewser.qualcomm.com/mailto/?to="
+IDS_DEFPROXYSETTINGS   102 STRING ISOLATIN1 "ftpon=1&amp;ftphost=brewser.qualcomm.com&amp;ftpport=65456&amp;gophon=1&amp;gophhost=brewser.qualcomm.com&amp;gophport=65456"
+
+#
+# tooltips
+#
+IDS_BACK                1 STRING ISOLATIN1 "Back"
+IDS_STOP                2 STRING ISOLATIN1 "Stop"
+IDS_REFRESH             3 STRING ISOLATIN1 "Refresh"
+IDS_GOTO                4 STRING ISOLATIN1 "Goto..."
+IDS_INFO                5 STRING ISOLATIN1 "Info"
+IDS_BOOKMARKS           6 STRING ISOLATIN1 "Bookmarks"
+IDS_HELP                7 STRING ISOLATIN1 "Help"
+IDS_OPT                 8 STRING ISOLATIN1 "Options"
+#
+# status stuff, these show up under the status bar
+#
+IDS_STATSTART          10 STRING ISOLATIN1 "starting..."
+IDS_STATGETHOSTBYNAME  11 STRING ISOLATIN1 "finding host..."
+IDS_STATCONNECT        12 STRING ISOLATIN1 "connecting..."
+IDS_STATSEND           13 STRING ISOLATIN1 "sending..."
+IDS_STATCANCEL         14 STRING ISOLATIN1 "cancelled..."
+IDS_STATRECV           15 STRING ISOLATIN1 "receiving..."
+#
+# these four used to desribe page info and cookie state,
+#   they need to be in the same character set as the 
+#   pageinfo.html and cfgcookies.html pages below
+#
+IDS_UNKNOWN            16 STRING ISOLATIN1 "Unknown"
+IDS_UNTITLED           17 STRING ISOLATIN1 "Untitled"
+IDS_ENABLED            18 STRING ISOLATIN1 "enabled"
+IDS_DISABLED           19 STRING ISOLATIN1 "disabled"
+
+#
+# Error descriptions, these get inserted into errpage.html, and
+#  so need to be in the same character set as errpage.html
+#  These also need to be arranged like their AEEError counterparts, 
+#  starting from 8000 hex
+#
+# catchall
+#
+IDS_ERRDESC_UNKNOWN              0x8000 STRING ISOLATIN1 "No error description is available"
+#
+# web errors start at 0x500
+#
+IDS_ERRDESC_WEB_PROTOCOL         0x8501 STRING ISOLATIN1 "BREW web protocol error"
+IDS_ERRDESC_WEB_BADURL           0x8502 STRING ISOLATIN1 "Invalid or malformed URL"
+IDS_ERRDESC_WEB_BADHOSTNAME      0x8503 STRING ISOLATIN1 "Invalid server hostname in URL"
+IDS_ERRDESC_WEB_BADPORT          0x8504 STRING ISOLATIN1 "Invalid port number in URL"
+IDS_ERRDESC_WEB_UNSUPSCHEME      0x8505 STRING ISOLATIN1 "Unsupported URL scheme"
+IDS_ERRDESC_WEB_DNSCONFIG        0x8506 STRING ISOLATIN1 "No DNS servers configured"
+IDS_ERRDESC_WEB_DNSTIMEOUT       0x8507 STRING ISOLATIN1 "No response from DNS server, request timed out"
+IDS_ERRDESC_WEB_ADDRUNKNOWN      0x8508 STRING ISOLATIN1 "Host lookup failed, address not found"
+IDS_ERRDESC_WEB_CONNECT          0x8509 STRING ISOLATIN1 "Could not establish a connection to server"
+IDS_ERRDESC_WEB_SEND             0x850A STRING ISOLATIN1 "Error occurred while sending data to server"
+IDS_ERRDESC_WEB_RECV             0x850B STRING ISOLATIN1 "Error occurred while receiving data from server"
+IDS_ERRDESC_WEB_BADRESPONSE      0x850C STRING ISOLATIN1 "Server response could not be understood"
+IDS_ERRDESC_WEB_BODYLENGTH       0x850D STRING ISOLATIN1 "Unable to send POST body, length unknown"
+IDS_ERRDESC_WEB_PROXYSPEC        0x850E STRING ISOLATIN1 "Proxy configuration error"
+IDS_ERRDESC_WEB_SSL              0x850F STRING ISOLATIN1 "SSL error"
+
+#
+# cert/security errors start at 0x0x600
+#
+IDS_ERRDESC_X509_BAD_CERT        0x8614 STRING ISOLATIN1 "Certificate couldn't be parsed (maybe it's not an X.509 cert)"
+IDS_ERRDESC_X509_BAD_VALIDITY    0x8615 STRING ISOLATIN1 "The validity dates in the certificate can't be parsed"
+IDS_ERRDESC_X509_BAD_KEY         0x8616 STRING ISOLATIN1 "The certificate's public key is understood but can't be parsed"
+IDS_ERRDESC_X509_UNKNOWN_KEY     0x8617 STRING ISOLATIN1 "Certificate has unknown public key type (wrong algorithm)"
+IDS_ERRDESC_X509_UNKNOWN_SIG     0x8618 STRING ISOLATIN1 "The signature on the certificate is unknown"
+IDS_ERRDESC_X509_NO_LEAF         0x8619 STRING ISOLATIN1 "Couldn't check certificate chain - there's no leaf certificate"
+IDS_ERRDESC_X509_NO_PART         0x861A STRING ISOLATIN1 "Couldn't find certificate's field part"
+IDS_ERRDESC_X509_NO_CHAIN_YET    0x861B STRING ISOLATIN1 "Certificate chain hasn't been computed"
+
+#
+# ssl errors start at 0x0xa00
+#
+IDS_ERRDESC_SSL_SECURED            0x8A00 STRING ISOLATIN1 "SSL connection was secured"
+IDS_ERRDESC_SSL_ALGS_ERR           0x8A01 STRING ISOLATIN1 "No SSL cipher algorithms in common"
+IDS_ERRDESC_SSL_TRUST_ERR          0x8A02 STRING ISOLATIN1 "Overridable SSL trust error"
+IDS_ERRDESC_SSL_CERT_ERR           0x8A03 STRING ISOLATIN1 "Non overridable SSL certificate problem"
+IDS_ERRDESC_SSL_PROTO_ERR          0x8A04 STRING ISOLATIN1 "Some fundamental error with the SSL protocol interaction"
+IDS_ERRDESC_SSL_CLIENT_AUTH_ERR    0x8A05 STRING ISOLATIN1 "SSL client authentication is required by server"
+IDS_ERRDESC_SSL_CLOSED             0x8A06 STRING ISOLATIN1 "Session was securely closed"
+IDS_ERRDESC_SSL_HANDSHAKE          0x8A07 STRING ISOLATIN1 "SSL handshake error (likely a bad mac error)"
+IDS_ERRDESC_SSL_UNINITIALIZED      0x8A08 STRING ISOLATIN1 "SSL uninitialized"
+IDS_ERRDESC_SSL_ERR                0x8A09 STRING ISOLATIN1 "General SSL error"
+IDS_ERRDESC_SSL_VERS_UNSUP         0x8A0A STRING ISOLATIN1 "Client doesn't support SSL protocol version"
+IDS_ERRDESC_SSL_CSUITE_UNSUP       0x8A0B STRING ISOLATIN1 "Client doesn't support any of the requested SSL cipher suites"
+IDS_ERRDESC_SSL_SERV_VERS          0x8A0C STRING ISOLATIN1 "Server doesn't support SSL protocol version"
+IDS_ERRDESC_SSL_TRUST_CHECK        0x8A0D STRING ISOLATIN1 "Pending SSL trust checks"
+IDS_ERRDESC_SSL_SOCKET_ERROR       0x8A0E STRING ISOLATIN1 "SSL got an underlying socket error"
+IDS_ERRDESC_SSL_SECURITY_LEVEL_ERR 0x8A0F STRING ISOLATIN1 "SSL Security level mismatch (can't re-use connection)"
+IDS_ERRDESC_SSL_CLOSE_NOTIFY_SENT  0x8A10 STRING ISOLATIN1 "SSL 'close notify' was sent, but have not received server's close notify"
+IDS_ERRDESC_SSL_BAD_SERVER_KEY     0x8A11 STRING ISOLATIN1 "SSL server's key is bad (the key in the server's certificate)"
+IDS_ERRDESC_SSL_BAD_STATE          0x8A12 STRING ISOLATIN1 "SSL state error"
+
+
+
+###########################################################################
+# BREWser html, start 'em out at 2000
+###########################################################################
+IDX_DEFAULTHOME       2000 BLOB  "text/html" @".\\res\\en\\defaulthome.html"
+IDX_HELP              2001 BLOB  "text/html" @".\\res\\en\\help.html"
+IDX_HELPLINK          2002 BLOB  "text/html" @".\\res\\en\\helplink.html"
+IDX_ASSERT            2003 BLOB  "text/html" @".\\res\\en\\assert.html"
+IDX_AUTH              2004 BLOB  "text/html" @".\\res\\en\\auth.html"
+IDX_BKMACTION         2005 BLOB  "text/html" @".\\res\\en\\bkmaction.html"
+IDX_BKMADD            2006 BLOB  "text/html" @".\\res\\en\\bkmadd.html"
+IDX_BKMDEL            2007 BLOB  "text/html" @".\\res\\en\\bkmdel.html"
+IDX_BKMDELX           2008 BLOB  "text/html" @".\\res\\en\\bkmdelx.html"
+IDX_BKMEDIT           2009 BLOB  "text/html" @".\\res\\en\\bkmedit.html"
+IDX_BKMLIST           2010 BLOB  "text/html" @".\\res\\en\\bkmlisttitle.html"
+IDX_BKMSAVED          2011 BLOB  "text/html" @".\\res\\en\\bkmsaved.html"
+IDX_CERTCHECK         2012 BLOB  "text/html" @".\\res\\en\\certcheck.html"
+IDX_CFGCOOKDEL        2013 BLOB  "text/html" @".\\res\\en\\cfgcookdel.html"
+IDX_CFGCOOKDELX       2014 BLOB  "text/html" @".\\res\\en\\cfgcookdelx.html"
+IDX_CFGCOOKIES        2015 BLOB  "text/html" @".\\res\\en\\cfgcookies.html"
+IDX_CFGCOOKINFO       2016 BLOB  "text/html" @".\\res\\en\\cfgcookinfo.html"
+IDX_CFGCOOKSUB        2017 BLOB  "text/html" @".\\res\\en\\cfgcooksub.html"
+IDX_CFGHOMEPAGE       2018 BLOB  "text/html" @".\\res\\en\\cfghomepage.html"
+IDX_CFGHOMEPAGERES    2019 BLOB  "text/html" @".\\res\\en\\cfghomepageres.html"
+IDX_CFGHOMEPAGERESX   2020 BLOB  "text/html" @".\\res\\en\\cfghomepageresx.html"
+IDX_CFGHOMEPAGESUB    2021 BLOB  "text/html" @".\\res\\en\\cfghomepagesub.html"
+IDX_CFGMAIL           2022 BLOB  "text/html" @".\\res\\en\\cfgmail.html"
+IDX_CFGMAILRES        2023 BLOB  "text/html" @".\\res\\en\\cfgmailres.html"
+IDX_CFGMAILRESX       2024 BLOB  "text/html" @".\\res\\en\\cfgmailresx.html"
+IDX_CFGMAILSUB        2025 BLOB  "text/html" @".\\res\\en\\cfgmailsub.html"
+IDX_CFGMENU           2026 BLOB  "text/html" @".\\res\\en\\cfgmenu.html"
+IDX_CFGPROXY          2027 BLOB  "text/html" @".\\res\\en\\cfgproxy.html"
+IDX_CFGPROXYRES       2028 BLOB  "text/html" @".\\res\\en\\cfgproxyres.html"
+IDX_CFGPROXYRESX      2029 BLOB  "text/html" @".\\res\\en\\cfgproxyresx.html"
+IDX_CFGPROXYSUB       2030 BLOB  "text/html" @".\\res\\en\\cfgproxysub.html"
+IDX_EFAILED           2031 BLOB  "text/html" @".\\res\\en\\efailed.html"
+IDX_ERRPAGE           2032 BLOB  "text/html" @".\\res\\en\\errpage.html"
+IDX_EXITPROMPT        2034 BLOB  "text/html" @".\\res\\en\\exitprompt.html"
+IDX_GOTO              2035 BLOB  "text/html" @".\\res\\en\\goto.html"
+IDX_GOTORECENT        2036 BLOB  "text/html" @".\\res\\en\\gotorecent.html"
+IDX_INTERNALPAGEINFO  2039 BLOB  "text/html" @".\\res\\en\\internalpageinfo.html"
+IDX_PROXYAUTH         2040 BLOB  "text/html" @".\\res\\en\\proxyauth.html"
+IDX_REFRESHPROMPT     2041 BLOB  "text/html" @".\\res\\en\\refreshprompt.html"
+IDX_SSLPAGEINFO       2042 BLOB  "text/html" @".\\res\\en\\sslpageinfo.html"
+IDX_STOPPED           2043 BLOB  "text/html" @".\\res\\en\\stopped.html"
+IDX_VERSION           2044 BLOB  "text/html" @".\\res\\en\\version.html"
+IDX_PAGEINFO          2048 BLOB  "text/html" @".\\res\\en\\pageinfo.html"
+			 
+###########################################################################
+# BREWser images, start 'em out at 1001
+###########################################################################
+IDB_GOTO              1001  IMAGE "image/bmp" @".\\res\\8bit\\goto.bmp"
+IDB_OPT               1002  IMAGE "image/bmp" @".\\res\\8bit\\opt.bmp"
+IDB_HELP              1003  IMAGE "image/bmp" @".\\res\\8bit\\help.bmp"
+IDB_BACK              1004  IMAGE "image/bmp" @".\\res\\8bit\\back.bmp"
+IDB_STOP              1005  IMAGE "image/bmp" @".\\res\\8bit\\stop.bmp"
+IDB_REFRESH           1006  IMAGE "image/bmp" @".\\res\\8bit\\refresh.bmp"
+IDB_STATUS            1007  IMAGE "image/bmp" @".\\res\\8bit\\status.bmp"
+IDI_STATUS_INFO       1007  BINARY =4100C800  # 2 words of info, frame width and frame duration
+IDB_SSLINFO           1008  IMAGE "image/bmp" @".\\res\\8bit\\sslinfo.bmp"
+IDB_INFO              1009  IMAGE "image/bmp" @".\\res\\8bit\\info.bmp"
+IDB_BOOKMARKS         1010  IMAGE "image/bmp" @".\\res\\8bit\\bkmks.bmp"
+IDB_ADDBKMK           1011  IMAGE "image/bmp" @".\\res\\8bit\\addbkmk.bmp"
+IDB_ADDBKMK_LG        1012  IMAGE "image/bmp" @".\\res\\8bit\\addbkmk-lg.bmp"
+IDB_OPT_LG            1013  IMAGE "image/bmp" @".\\res\\8bit\\opt-lg.bmp"
+IDB_BKMKS_LG          1014  IMAGE "image/bmp" @".\\res\\8bit\\bkmks-lg.bmp"
+IDB_INFO_LG           1015  IMAGE "image/bmp" @".\\res\\8bit\\info-lg.bmp"
+IDB_GOTO_LG           1016  IMAGE "image/bmp" @".\\res\\8bit\\goto-lg.bmp"
+IDB_SSLINFO_LG        1017  IMAGE "image/bmp" @".\\res\\8bit\\sslinfo-lg.bmp"
+IDB_HELP_LG           1018  IMAGE "image/bmp" @".\\res\\8bit\\help-lg.bmp"
+IDB_BANG_LG           1019  IMAGE "image/bmp" @".\\res\\8bit\\bang-lg.bmp"
+
+#
+# these identical to their non-img versions above, but used as inline 
+#  images in html
+#
+IDB_IMG_GOTO              1020  IMAGE "image/bmp" @".\\res\\8bit\\goto-img.bmp"
+IDB_IMG_OPT               1021  IMAGE "image/bmp" @".\\res\\8bit\\opt-img.bmp"
+IDB_IMG_HELP              1022  IMAGE "image/bmp" @".\\res\\8bit\\help-img.bmp"
+IDB_IMG_BACK              1023  IMAGE "image/bmp" @".\\res\\8bit\\back-img.bmp"
+IDB_IMG_STOP              1024  IMAGE "image/bmp" @".\\res\\8bit\\stop-img.bmp"
+IDB_IMG_REFRESH           1025  IMAGE "image/bmp" @".\\res\\8bit\\refresh-img.bmp"
+IDB_IMG_SSLINFO           1026  IMAGE "image/bmp" @".\\res\\8bit\\sslinfo-img.bmp"
+IDB_IMG_INFO              1027  IMAGE "image/bmp" @".\\res\\8bit\\info-img.bmp"
+IDB_IMG_BOOKMARKS         1028  IMAGE "image/bmp" @".\\res\\8bit\\bkmks-img.bmp"

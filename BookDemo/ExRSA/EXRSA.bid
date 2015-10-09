@@ -1,0 +1,6 @@
+#ifndef EXRSA_BID
+#define EXRSA_BID
+
+#define AEECLSID_EXRSA        0x12001002
+
+#endif //EXRSA_BID

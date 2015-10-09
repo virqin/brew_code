@@ -1,0 +1,6 @@
+#ifndef EXFILE_BID
+#define EXFILE_BID
+
+#define AEECLSID_EXFILE        0x12001003
+
+#endif //EXFILE_BID

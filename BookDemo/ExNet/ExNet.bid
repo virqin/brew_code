@@ -1,0 +1,4 @@
+#ifndef EXNET_BID
+#define EXNET_BID
+#define AEECLSID_EXNET  0x12000005
+#endif

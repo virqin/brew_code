@@ -1,0 +1,6 @@
+#ifndef EXHOOK_BID
+#define EXHOOK_BID
+
+#define AEECLSID_EXHOOK        0x12001008
+
+#endif //EXHOOK_BID

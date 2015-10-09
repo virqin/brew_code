@@ -1,0 +1,5 @@
+#ifndef EXTENSION_BID
+#define EXTENSION_BID
+
+#define AEECLSID_EXTCLASS_CLS 0x02000001
+#endif

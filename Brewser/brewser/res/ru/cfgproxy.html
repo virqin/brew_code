@@ -1,0 +1,19 @@
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=UTF-8">
+<html>
+<h2 align=center><img width=20 height=20 src="res:/brewser.bar?1013">&nbsp;Модули "proxy"</h2> <a href="lcgi:cfg.{invoke}.proxies.reset">Сбросить на установки по умолчанию</a>
+<form action="lcgi:cfg.{invoke}.proxies.ok">
+<input type=checkbox name=httpon {httpon}>Proxy HTTP<br> Хост <b>:</b> Порт<br>
+<input type=text maxlen=256 size=13 name=httphost value="{httphost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=httpport value="{httpport}"><br>
+<input type=checkbox name=ftpon {ftpon}>Proxy FTP<br> Хост <b>:</b> Порт<br>
+<input type=text maxlen=256 size=13 name=ftphost value="{ftphost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=ftpport value="{ftpport}"><br>
+<input type=checkbox name=gophon {gophon}>Proxy Gopher<br> Хост <b>:</b> Порт<br>
+<input type=text maxlen=256 size=13 name=gophhost value="{gophhost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=gophport value="{gophport}"><br>
+<input type=checkbox name=othon {othon}>Другие схемы "proxy"<br> Хост <b>:</b> Порт<br>
+<input type=text maxlen=256 size=13 name=othhost value="{othhost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=othport value="{othport}"><br> Схемы: <br>(список с запятыми в качестве разделителей, напр. "http,ftp")<br>
+<input type=text maxlen=1024 size=50 name=othschm value="{othschm}"><br> <a href="x-submit:">Сохранить</a>
+</form>
+</html>

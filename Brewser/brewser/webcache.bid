@@ -1,0 +1,6 @@
+#ifndef WEBCACHE_BID
+#define WEBCACHE_BID
+
+#define AEECLSID_WEBCACHE        0x01012cfe
+
+#endif //WEBCACHE_BID

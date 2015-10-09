@@ -1,0 +1,306 @@
+#============================================================================
+ #      A U T O M A K E . M A K - a Generic Makefile for BREW in UNIX envi.
+ #       
+ #  This automatically make file is created by Dr. X. ZHANG,  2008
+ #    No rights are reserved, :-)
+ #
+ #  It can automatically build brew app using source code in current dir
+ #
+ #  Limitations:
+ #      1) currently, only support in UNIX envirionment, in Windows, no need
+ #      2) Make sure every *.c/c++ file in current dir is wanted, unwanted c/h file may cause build failure
+ #      3) It only search current dir
+ #      4) Currently, we do not support additional include directory
+ #       
+ # if you meet eror like:
+ #       Error: L6218E: Undefined symbol __rt_sdiv (referred from xxxx.o)
+ #       Error: L6218E: Undefined symbol __pvfn() (referred from xxxx.o)
+ # please change:
+ #       LINK_ORDER = $(ARMLIB)/armlib/c_a__un.l $(ARMLIB)/armlib/f_a_m.l -first AEEMod_Load         
+ #
+ #     
+ #  Special Comments:
+ #       1. In make file, be careful to add comments,  
+ #                A=B     # here A="B      ", not "B"
+ #       2. $@ -> Current object
+ #           $< : The first dependent file
+ #           $^ : the whole dependent list         
+ #           $(@F): the real file name without dir for the object file
+ #           $(AAA:.c-.o) : means replace AAA list fom .c -> .0
+ #                       if (AAA = "1.c 2.c 3.c") => "1.o 2.o 3.o"
+ #           $(<D) : directory name of the first dependency
+ #           $(<F) : pure file name of the first dependency
+ #           $(^D)/$(^F):  directory and pure file names of all dependency files
+ #           $(?)  : dependency recently changed
+ #
+ #       3. specil rule:
+ #            .c.o:  # old format rule, never add dependency hee!!!
+ #               $(CC) -c $(CFLAGS) -o $@ $<     # $@ -> object, $< dependent list
+ #           equals to:
+ #            %.o:%c
+ #               $(CC) -c $(CFLAGS) -o $@ $<     # $@ -> object, $< dependent list
+ #
+ #  Revision histry:
+ #       2008-09-04: Initial creation
+ #                   Add support automatically check/copy AEEModGen.c/AEEAppGen.c from VOB
+ #       2009-01-13: Move mechnism for copying AEEModeGen.c/AEEAppGen.c from dependency of object to c
+ #                          to dependency of mod to elf file
+ #                   Support C/C++ combine build, now you can have both c and C++ source code in a project                       
+ #
+ #
+ #============================================================================
+
+ .PHONY : check_AEEAppGen_AEEModGen enforce_copy_AEEAppGen_c enforce_copy_AEEModGen_c  do_nothing clean
+
+ #============================================================================
+ ECHO           = @echo # my UNIX shell doesn't support "@echo" ?
+ ARMBIN         = ARM BIN DIR in UNIX envi. # you should replace this dir
+ TARGET         =hello_world
+
+ # ---------------------------------------------------------------------------------------
+ # automatically search *.c file in current dir,
+ # WE do not need consider AEEAppGen.c/AEEModGen.c in UNIX system
+ #---------------------------------------------------------------------------------------
+ SRC_FILES := $(shell ls *.c)
+ SRC_FILES_CPP := $(shell ls *.cpp) # , 2009-01-13
+ # source header file
+ SRC_HEADER := $(shell ls *.h *.brh)
+
+ # source bid file
+ SRC_BID    := $(shell ls *.bid)
+
+ # deduce the object file name
+ OBJECT_FILES  = $(SRC_FILES:.c=.o)
+ OBJECT_FILES_CPP = $(SRC_FILES_CPP:.cpp=.o) # 2009-01-13
+
+ #if AEEModGen.c/AeeAppGen.c are not in the dir, we will copy it
+ ifeq ($(findstring AEEModGen.o,$(OBJECT_FILES)),)
+    OBJECT_FILES += AEEModGen.o
+    check_AEEAppGen_AEEModGen += enforce_copy_AEEModGen_c
+ endif
+ ifeq ($(findstring AEEAppGen.o,$(OBJECT_FILES)),)
+     OBJECT_FILES += AEEAppGen.o
+     check_AEEAppGen_AEEModGen += enforce_copy_AEEAppGen_c
+ endif  
+
+ ifeq ($(check_AEEAppGen_AEEModGen),)
+     # disable information output when AEEAppMod, AEEModGen are already there
+     # check_AEEAppGen_AEEModGen = do_nothing
+ endif
+ #-------------------------------------------------------------------------------
+ # Target file name and type definitions
+ #-------------------------------------------------------------------------------
+
+ # Target image file format
+ EXETYPE    = elf
+ # Downloadable module extension
+ MODULE     = mod
+
+
+ #-------------------------------------------------------------------------------
+ # Target compile time symbol definitions
+ #
+ # Tells the SDK source stuffs that we're building a dynamic app.
+ #-------------------------------------------------------------------------------
+
+ DYNAPP          = -DDYNAMIC_APP
+
+
+ #-------------------------------------------------------------------------------
+ # Software tool and environment definitions
+ #-------------------------------------------------------------------------------
+
+ AEEINCPATH = YOUR AEE DIR # replace it using your dir
+ ARMINC = $(AEEINCPATH)    # ARM ADS include file directory
+
+ ARMCC   = $(ARMBIN)/armcc       # ARM ADS ARM 32-bit inst. set ANSI C compiler
+ ARMCPP  = $(ARMBIN)/armcpp      # ARM ADS ARM 32-bit inst. set ANSI Cpp compiler, 2009-01-13
+ LD      = $(ARMBIN)/armlink     # ARM ADS linker
+ HEXTOOL = $(ARMBIN)/fromelf     # ARM ADS utility to create hex file from image
+
+ OBJ_CMD    = -o # Command line option to specify output filename
+
+ #-------------------------------------------------------------------------------
+ # Processor architecture options
+ #-------------------------------------------------------------------------------
+
+ CPU = -cpu ARM7TDMI # ARM7TDMI target processor ??? I temperalily change to ARM9, Xiaoguo
+
+ #-------------------------------------------------------------------------------
+ # ARM Procedure Call Standard (APCS) options
+ #-------------------------------------------------------------------------------
+
+ # Read-Only(code) Position independence
+ ROPI     = ropi
+ # Allow ARM-Thumb interworking
+ INTERWRK = interwork
+
+ APCS = -apcs /$(ROPI)/$(INTERWRK)/norwpi
+
+ #-------------------------------------------------------------------------------
+ # Additional compile time error checking options
+ #-------------------------------------------------------------------------------
+
+ CHK = -fa # Check for data flow anomolies
+
+ #-------------------------------------------------------------------------------
+ # Compiler output options
+ #-------------------------------------------------------------------------------
+
+ OUT = -c # Object file output only
+
+ #-------------------------------------------------------------------------------
+ # Compiler/assembler debug options
+ #-------------------------------------------------------------------------------
+
+ DBG = -g # Enable debug
+
+ #-------------------------------------------------------------------------------
+ # Compiler optimization options
+ #-------------------------------------------------------------------------------
+
+ OPT = -O1 -D_MICROTEC=FALSE # Full compiler optimization for space
+
+ #-------------------------------------------------------------------------------
+ # Compiler code generation options
+ #-------------------------------------------------------------------------------
+
+ END = -littleend # Compile for little endian memory architecture
+ ZA  = -zo # LDR may only access 32-bit aligned addresses
+
+ CODE = $(END) $(ZA)
+
+
+ #-------------------------------------------------------------------------------
+ # Include file search path options
+ #-------------------------------------------------------------------------------
+
+ INC = -I. -I$(AEEINCPATH)
+
+
+ #-------------------------------------------------------------------------------
+ # Compiler pragma emulation options
+ #-------------------------------------------------------------------------------
+
+
+ #-------------------------------------------------------------------------------
+ # Linker options
+ #-------------------------------------------------------------------------------
+
+ LINK_CMD = -o #Command line option to specify output file
+               #on linking
+
+ ROPILINK = -ropi #Link image as Read-Only Position Independent
+
+ LINK_ORDER = -first AEEMod_Load
+
+ #-------------------------------------------------------------------------------
+ # HEXTOOL options
+ #-------------------------------------------------------------------------------
+
+ BINFORMAT = -bin
+
+
+ #-------------------------------------------------------------------------------
+ # Compiler flag definitions
+ #-------------------------------------------------------------------------------
+
+ CFLAGS0 = $(OUT) $(DYNAPP) $(CPU) $(APCS) $(CODE) $(CHK) $(DBG)
+ CFLAGS  = $(CFLAGS0) $(OPT)
+
+ #-------------------------------------------------------------------------------
+ # Linker flag definitions
+ #-------------------------------------------------------------------------------
+
+ # the -entry flag is not really needed, but it keeps the linker from reporting
+ # warning L6305W (no entry point).  The address
+ LFLAGS = $(ROPILINK) -rwpi -entry 0x8000#
+
+ #----------------------------------------------------------------------------
+ # Default target
+ #----------------------------------------------------------------------------
+
+ all :  $(TARGET).$(MODULE)
+
+ #----------------------------------------------------------------------------
+ # Clean target
+ #----------------------------------------------------------------------------
+
+ # The object subdirectory, target image file, and target hex file are deleted.
+
+ clean :
+     $(ECHO) ---------------------------------------------------------------
+     $(ECHO) CLEAN
+     rm -r -f $(OBJECT_FILES) $(OBJECT_FILES_CPP) # 2009-01-13, add cpp objects
+     rm -r -f $(TARGET).$(EXETYPE)
+     rm -r -f $(TARGET).$(MODULE)
+     $(ECHO) ---------------------------------------------------------------
+
+
+ #===============================================================================
+ #                           MODULE SPECIFIC RULES
+ #===============================================================================
+
+ APP_OBJS = $(OBJECT_FILES)
+ APP_OBJS_CPP = $(OBJECT_FILES_CPP) # 2009-01-13
+
+ #----------------------------------------------------------------------------
+ # Lib file targets: dependency mod over elf and check_AEEAppGen_AEEModGen
+ #          A phony obeject check_AEEAppGen_AEEModGen is used to control
+ #             copy AEEModGen, AEEAppGen from vob
+ #----------------------------------------------------------------------------
+
+ $(TARGET).$(MODULE) : $(check_AEEAppGen_AEEModGen) $(TARGET).$(EXETYPE)
+     $(ECHO) ------------------------------------1---------------------------
+     $(ECHO) TARGET $(TARGET).$(MODULE)
+     $(HEXTOOL) $(TARGET).$(EXETYPE) $(BINFORMAT) $(TARGET).$(MODULE)
+
+ $(TARGET).$(EXETYPE) : $(APP_OBJS) $(APP_OBJS_CPP)
+     $(ECHO) -----------------------------------2----------------------------
+     #$(ECHO) SRC file: $(SRC_FILES) ,  OBJECT_FILES: $(OBJECT_FILES)-   # commented out on 2009-01-13
+     $(ECHO) SRC file: $(SRC_FILES) $(SRC_FILES_CPP) ,  OBJECT_FILES: $(OBJECT_FILES) OBJECT_FILES_CPP: $(OBJECT_FILES_CPP) # 2009-01-13
+     $(ECHO) TARGET $(TARGET).$(EXETYPE)
+     #$(LD) $(LINK_CMD) $(TARGET).$(EXETYPE) $(LFLAGS) $(APP_OBJS) $(LINK_ORDER)
+     $(LD) $(LINK_CMD) $(TARGET).$(EXETYPE) $(LFLAGS) $(APP_OBJS) $(APP_OBJS_CPP)  $(LINK_ORDER)
+
+ # ---------------------------------------------------------------------------------
+ # DEPENDENCY LIST, DO NOT EDIT BELOW THIS LINE
+ #---------------------------------------------------------------------------------
+ #    2009-01-1, rules for compile C files
+ # ---------------------------------------------------------------------------------
+ $(OBJECT_FILES): $(SRC_FILES) $(SRC_HEADER) $(SRC_BID)
+     $(ECHO) ----------------------- 3 build c files ---------------------------
+     $(ECHO) OBJECT: $(@F);
+     $(ARMCC) $(CFLAGS) $(INC) $(OBJ_CMD) $(@F)  $(@F:.o=.c)   
+     $(ECHO)
+
+ # ---------------------------------------------------------------------------------
+ # 2009-01-1, rules for compile CPP files
+ # ---------------------------------------------------------------------------------
+ $(OBJECT_FILES_CPP): $(SRC_FILES_CPP) $(SRC_HEADER) $(SRC_BID)
+     $(ECHO) ----------------------- 3 build cpp -------------------------------
+     $(ECHO) OBJECT: $(@F);
+     $(ARMCPP) $(CFLAGS) $(INC) $(OBJ_CMD) $(@F)  $(@F:.o=.cpp)
+     $(ECHO)
+
+
+ #---------------------------------------------------------------------------
+ # special handle for AEEModGen.c, AEEAppGen.c
+ # if there is no such file, copy from VOB
+ #---------------------------------------------------------------------------
+ enforce_copy_AEEAppGen_c:
+     $(ECHO) No AEEAppGen.c, copy from VOB ...
+     @rm -r -f AEEAppGen.c
+     @cp AEEAppGen.c in some where  to here # place replace this command using your setting
+     $(ECHO)      
+     
+ enforce_copy_AEEModGen_c:
+     $(ECHO) No AEEModGen.c, copy from VOB ...
+     @rm -r -f AEEModGen.c
+     @cp AEEModGen.c to here # please using your setting to replace it
+     $(ECHO)  
+     
+ do_nothing:
+     $(ECHO) =========================================================================
+     $(ECHO) AEEModGen.c and AEEAppGen.c are already there, no need copy again!!!
+     $(ECHO)  

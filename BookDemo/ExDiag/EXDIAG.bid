@@ -1,0 +1,6 @@
+#ifndef EXDIAG_BID
+#define EXDIAG_BID
+
+#define AEECLSID_EXDIAG        0x12001004
+
+#endif //EXDIAG_BID

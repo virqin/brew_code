@@ -1,0 +1,6 @@
+#ifndef EXTAPI_BID
+#define EXTAPI_BID
+
+#define AEECLSID_EXTAPI        0x12001001
+
+#endif //EXTAPI_BID

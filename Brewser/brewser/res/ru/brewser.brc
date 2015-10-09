@@ -1,0 +1,232 @@
+###########################################################################
+###########################################################################
+### 
+### BRC (BREW Resource Compiler) File
+### ---------------------------------
+### Each line of a BREW Resource Compiler input file has the form:
+### 
+###    <type> <id> <id_name> {data}
+### 
+### Where:
+###    type    = STRING, IMAGE, and BLOB currently supported
+###    id      = an integer id for the resource
+###    id_name = a symbolic, legal-C-preprocessor token name for use in
+###                the resource header, for "#define XX <id>"
+###    {data}  = for STRING: <type> <SP> <quoted-text>
+###               where <type> is one of: ISOLATIN1, SJIS,
+###                  GB3212 (or EUC_CN), KSC5601 (or EUC_KR), or UTF8
+###              for IMAGE and BLOB: <mimetype> <SP> @<filename>
+###                              or: <mimetype> <SP> <quoted-text>
+### 
+### Notes:
+###    * IMAGE and BLOB resources must have mutually unique ids.
+###    * Only single-byte string formats are supported.
+###    * Lines beginning with '#' are treated as comments.
+###    * STRING resources may contain escape chars \r, \n, \t and octal 
+###       numbers to include a ", use \" (just like C)
+### 
+### Examples:
+### 
+### # an ISOLATIN1 string
+### IDS_HI          1   STRING    ISOLATIN1 "hi"
+### 
+### # a bitmap image
+### IDB_HI        101   IMAGE     "image/bmp" @"hi.bmp"
+### 
+### # an html page
+### IDX_HI        201   BLOB      "text/html" @"hi.html"
+### 
+### # an html page inline
+### IDX_INLHI     202   BLOB      "text/html" "<html>hi</html>"
+##############################################################################
+###########################################################################
+
+###########################################################################
+# BREWser strings, config values start at 100, rest start at 1
+###########################################################################
+#
+# config defaults 
+#
+IDS_DEFHOMEPAGE        100 STRING ISOLATIN1 "res:/brewser.bar?2000"
+IDS_DEFMAILTO          101 STRING ISOLATIN1 "http://brewser.qualcomm.com/mailto/?to="
+IDS_DEFPROXYSETTINGS   102 STRING ISOLATIN1 "ftpon=1&amp;ftphost=brewser.qualcomm.com&amp;ftpport=65456&amp;gophon=1&amp;gophhost=brewser.qualcomm.com&amp;gophport=65456"
+
+#
+# tooltips
+#
+IDS_BACK                1 STRING UTF8 "Назад"
+IDS_STOP                2 STRING UTF8 "Стоп"
+IDS_REFRESH             3 STRING UTF8 "Обновить"
+IDS_GOTO                4 STRING UTF8 "Перейти..."
+IDS_INFO                5 STRING UTF8 "Информация"
+IDS_BOOKMARKS           6 STRING UTF8 "Закладки"
+IDS_HELP                7 STRING UTF8 "Справка"
+IDS_OPT                 8 STRING UTF8 "Опции"
+#
+# status stuff, these show up under the status bar
+#
+IDS_STATSTART          10 STRING UTF8 "запуск..."
+IDS_STATGETHOSTBYNAME  11 STRING UTF8 "поиск сервера..."
+IDS_STATCONNECT        12 STRING UTF8 "соединение..."
+IDS_STATSEND           13 STRING UTF8 "посылка..."
+IDS_STATCANCEL         14 STRING UTF8 "отмена..."
+IDS_STATRECV           15 STRING UTF8 "прием..."
+#
+# these four used to desribe page info and cookie state,
+#   they need to be in the same character set as the 
+#   pageinfo.html and cfgcookies.html pages below
+#
+IDS_UNKNOWN            16 STRING UTF8 "Неизвестно"
+IDS_UNTITLED           17 STRING UTF8 "Без названия"
+IDS_ENABLED            18 STRING UTF8 "разрешено"
+IDS_DISABLED           19 STRING UTF8 "запрещено"
+
+#
+# Error descriptions, these get inserted into errpage.html, and
+#  so need to be in the same character set as errpage.html
+#  These also need to be arranged like their AEEError counterparts, 
+#  starting from 8000 hex
+#
+# catchall
+#
+IDS_ERRDESC_UNKNOWN              0x8000 STRING UTF8 "Описания ошибки нет"
+#
+# web errors start at 0x500
+#
+IDS_ERRDESC_WEB_PROTOCOL         0x8501 STRING UTF8 "Ошибка сетевого протокола BREW"
+IDS_ERRDESC_WEB_BADURL           0x8502 STRING UTF8 "Недействительный или неправильный URL"
+IDS_ERRDESC_WEB_BADHOSTNAME      0x8503 STRING UTF8 "Недействительное имя сервера в URL"
+IDS_ERRDESC_WEB_BADPORT          0x8504 STRING UTF8 "Недействительный номер порта в URL"
+IDS_ERRDESC_WEB_UNSUPSCHEME      0x8505 STRING UTF8 "Неподдерживаемая схема URL"
+IDS_ERRDESC_WEB_DNSCONFIG        0x8506 STRING UTF8 "Нет сконфигурированных серверов DNS"
+IDS_ERRDESC_WEB_DNSTIMEOUT       0x8507 STRING UTF8 "Нет ответа от сервера DNS, запрос истек"
+IDS_ERRDESC_WEB_ADDRUNKNOWN      0x8508 STRING UTF8 "Сервер не найден, адрес не найден"
+IDS_ERRDESC_WEB_CONNECT          0x8509 STRING UTF8 "Невозможно установить соединение с сервером"
+IDS_ERRDESC_WEB_SEND             0x850A STRING UTF8 "Ошибка при передаче данных серверу"
+IDS_ERRDESC_WEB_RECV             0x850B STRING UTF8 "Ошибка при приеме данных от сервера"
+IDS_ERRDESC_WEB_BADRESPONSE      0x850C STRING UTF8 "Ответ сервера не понятен"
+IDS_ERRDESC_WEB_BODYLENGTH       0x850D STRING UTF8 "Невозможно отправить текст POST, длина неизвестна"
+IDS_ERRDESC_WEB_PROXYSPEC        0x850E STRING UTF8 "Ошибка конфигурации \"proxy\""
+IDS_ERRDESC_WEB_SSL              0x850F STRING UTF8 "Ошибка SSL"
+
+#
+# cert/security errors start at 0x0x600
+#
+IDS_ERRDESC_X509_BAD_CERT        0x8614 STRING UTF8 "Невозможность анализа сертификата (может быть, это не сертификат X.509)"
+IDS_ERRDESC_X509_BAD_VALIDITY    0x8615 STRING UTF8 "Невозможность анализа дат срока действия сертификата"
+IDS_ERRDESC_X509_BAD_KEY         0x8616 STRING UTF8 "Открытый ключ сертификата распознан, но не поддается анализу"
+IDS_ERRDESC_X509_UNKNOWN_KEY     0x8617 STRING UTF8 "Сертификат имеет открытый ключ неизвестного типа (неправильный алгоритм)"
+IDS_ERRDESC_X509_UNKNOWN_SIG     0x8618 STRING UTF8 "Подпись сертификата неизвестна"
+IDS_ERRDESC_X509_NO_LEAF         0x8619 STRING UTF8 "Невозможно проверить цепь сертификата - нет листа сертификата"
+IDS_ERRDESC_X509_NO_PART         0x861A STRING UTF8 "Невозможно найти часть поля сертификата"
+IDS_ERRDESC_X509_NO_CHAIN_YET    0x861B STRING UTF8 "Цепь сертификата не вычислена"
+
+#
+# ssl errors start at 0x0xa00
+#
+IDS_ERRDESC_SSL_SECURED            0x8A00 STRING UTF8 "Соединение SSL безопасно"
+IDS_ERRDESC_SSL_ALGS_ERR           0x8A01 STRING UTF8 "Нет общих алгоритмов шифрования SSL"
+IDS_ERRDESC_SSL_TRUST_ERR          0x8A02 STRING UTF8 "Игнорируемая ошибка доверительного SSL"
+IDS_ERRDESC_SSL_CERT_ERR           0x8A03 STRING UTF8 "Неигнорируемая проблема сертификата SSL"
+IDS_ERRDESC_SSL_PROTO_ERR          0x8A04 STRING UTF8 "Значительная ошибка при взаимодействии с протоколом SSL"
+IDS_ERRDESC_SSL_CLIENT_AUTH_ERR    0x8A05 STRING UTF8 "Сервер требует аутентификации клиента SSL"
+IDS_ERRDESC_SSL_CLOSED             0x8A06 STRING UTF8 "Сессия была безопасно завершена"
+IDS_ERRDESC_SSL_HANDSHAKE          0x8A07 STRING UTF8 "Ошибка согласования SSL (наверняка, ошибка \"bad mac\")"
+IDS_ERRDESC_SSL_UNINITIALIZED      0x8A08 STRING UTF8 "Инициализация SSL"
+IDS_ERRDESC_SSL_ERR                0x8A09 STRING UTF8 "Общая ошибка SSL"
+IDS_ERRDESC_SSL_VERS_UNSUP         0x8A0A STRING UTF8 "Клиент не поддерживает версию протокола SSL"
+IDS_ERRDESC_SSL_CSUITE_UNSUP       0x8A0B STRING UTF8 "Клиент не поддерживает никакие из необходимых наборов шифрования SSL"
+IDS_ERRDESC_SSL_SERV_VERS          0x8A0C STRING UTF8 "Сервер не поддерживает версию протокола SSL"
+IDS_ERRDESC_SSL_TRUST_CHECK        0x8A0D STRING UTF8 "Проверка доверительного SSL"
+IDS_ERRDESC_SSL_SOCKET_ERROR       0x8A0E STRING UTF8 "Ошибка нижнего сокета SSL"
+IDS_ERRDESC_SSL_SECURITY_LEVEL_ERR 0x8A0F STRING UTF8 "Несоответствие уровня безопасности SSL (невозможно использовать соединение заново)"
+IDS_ERRDESC_SSL_CLOSE_NOTIFY_SENT  0x8A10 STRING UTF8 "Сообщение с уведомлением о закрытии SSL 'close notify' было отослано, но сообщение с уведомлением о закрытии 'close notify' от сервера получено не было"
+IDS_ERRDESC_SSL_BAD_SERVER_KEY     0x8A11 STRING UTF8 "Неправильный ключ сервера SSL (ключ сертификата сервера)"
+IDS_ERRDESC_SSL_BAD_STATE          0x8A12 STRING UTF8 "Ошибка состояния SSL"
+
+
+
+###########################################################################
+# BREWser html, start 'em out at 2000
+###########################################################################
+IDX_DEFAULTHOME       2000 BLOB  "text/html" @"defaulthome.html"
+IDX_HELP              2001 BLOB  "text/html" @"help.html"
+IDX_HELPLINK          2002 BLOB  "text/html" @"helplink.html"
+IDX_ASSERT            2003 BLOB  "text/html" @"assert.html"
+IDX_AUTH              2004 BLOB  "text/html" @"auth.html"
+IDX_BKMACTION         2005 BLOB  "text/html" @"bkmaction.html"
+IDX_BKMADD            2006 BLOB  "text/html" @"bkmadd.html"
+IDX_BKMDEL            2007 BLOB  "text/html" @"bkmdel.html"
+IDX_BKMDELX           2008 BLOB  "text/html" @"bkmdelx.html"
+IDX_BKMEDIT           2009 BLOB  "text/html" @"bkmedit.html"
+IDX_BKMLIST           2010 BLOB  "text/html" @"bkmlisttitle.html"
+IDX_BKMSAVED          2011 BLOB  "text/html" @"bkmsaved.html"
+IDX_CERTCHECK         2012 BLOB  "text/html" @"certcheck.html"
+IDX_CFGCOOKDEL        2013 BLOB  "text/html" @"cfgcookdel.html"
+IDX_CFGCOOKDELX       2014 BLOB  "text/html" @"cfgcookdelx.html"
+IDX_CFGCOOKIES        2015 BLOB  "text/html" @"cfgcookies.html"
+IDX_CFGCOOKINFO       2016 BLOB  "text/html" @"cfgcookinfo.html"
+IDX_CFGCOOKSUB        2017 BLOB  "text/html" @"cfgcooksub.html"
+IDX_CFGHOMEPAGE       2018 BLOB  "text/html" @"cfghomepage.html"
+IDX_CFGHOMEPAGERES    2019 BLOB  "text/html" @"cfghomepageres.html"
+IDX_CFGHOMEPAGERESX   2020 BLOB  "text/html" @"cfghomepageresx.html"
+IDX_CFGHOMEPAGESUB    2021 BLOB  "text/html" @"cfghomepagesub.html"
+IDX_CFGMAIL           2022 BLOB  "text/html" @"cfgmail.html"
+IDX_CFGMAILRES        2023 BLOB  "text/html" @"cfgmailres.html"
+IDX_CFGMAILRESX       2024 BLOB  "text/html" @"cfgmailresx.html"
+IDX_CFGMAILSUB        2025 BLOB  "text/html" @"cfgmailsub.html"
+IDX_CFGMENU           2026 BLOB  "text/html" @"cfgmenu.html"
+IDX_CFGPROXY          2027 BLOB  "text/html" @"cfgproxy.html"
+IDX_CFGPROXYRES       2028 BLOB  "text/html" @"cfgproxyres.html"
+IDX_CFGPROXYRESX      2029 BLOB  "text/html" @"cfgproxyresx.html"
+IDX_CFGPROXYSUB       2030 BLOB  "text/html" @"cfgproxysub.html"
+IDX_EFAILED           2031 BLOB  "text/html" @"efailed.html"
+IDX_ERRPAGE           2032 BLOB  "text/html" @"errpage.html"
+IDX_EXITPROMPT        2034 BLOB  "text/html" @"exitprompt.html"
+IDX_GOTO              2035 BLOB  "text/html" @"goto.html"
+IDX_GOTORECENT        2036 BLOB  "text/html" @"gotorecent.html"
+IDX_INTERNALPAGEINFO  2039 BLOB  "text/html" @"internalpageinfo.html"
+IDX_PROXYAUTH         2040 BLOB  "text/html" @"proxyauth.html"
+IDX_REFRESHPROMPT     2041 BLOB  "text/html" @"refreshprompt.html"
+IDX_SSLPAGEINFO       2042 BLOB  "text/html" @"sslpageinfo.html"
+IDX_STOPPED           2043 BLOB  "text/html" @"stopped.html"
+IDX_VERSION           2044 BLOB  "text/html" @"version.html"
+IDX_PAGEINFO          2048 BLOB  "text/html" @"pageinfo.html"
+			 
+###########################################################################
+# BREWser images, start 'em out at 1001
+###########################################################################
+IDB_GOTO              1001  IMAGE "image/bmp" @"goto.bmp"
+IDB_OPT               1002  IMAGE "image/bmp" @"opt.bmp"
+IDB_HELP              1003  IMAGE "image/bmp" @"help.bmp"
+IDB_BACK              1004  IMAGE "image/bmp" @"back.bmp"
+IDB_STOP              1005  IMAGE "image/bmp" @"stop.bmp"
+IDB_REFRESH           1006  IMAGE "image/bmp" @"refresh.bmp"
+IDB_STATUS            1007  IMAGE "image/bmp" @"status.bmp"
+IDI_STATUS_INFO       1007  BINARY =4100C800  # 2 words of info, frame width and frame duration
+IDB_SSLINFO           1008  IMAGE "image/bmp" @"sslinfo.bmp"
+IDB_INFO              1009  IMAGE "image/bmp" @"info.bmp"
+IDB_BOOKMARKS         1010  IMAGE "image/bmp" @"bkmks.bmp"
+IDB_ADDBKMK           1011  IMAGE "image/bmp" @"addbkmk.bmp"
+IDB_ADDBKMK_LG        1012  IMAGE "image/bmp" @"addbkmk-lg.bmp"
+IDB_OPT_LG            1013  IMAGE "image/bmp" @"opt-lg.bmp"
+IDB_BKMKS_LG          1014  IMAGE "image/bmp" @"bkmks-lg.bmp"
+IDB_INFO_LG           1015  IMAGE "image/bmp" @"info-lg.bmp"
+IDB_GOTO_LG           1016  IMAGE "image/bmp" @"goto-lg.bmp"
+IDB_SSLINFO_LG        1017  IMAGE "image/bmp" @"sslinfo-lg.bmp"
+IDB_HELP_LG           1018  IMAGE "image/bmp" @"help-lg.bmp"
+IDB_BANG_LG           1019  IMAGE "image/bmp" @"bang-lg.bmp"
+
+#
+# these identical to their non-img versions above, but used as inline 
+#  images in html
+#
+IDB_IMG_GOTO              1020  IMAGE "image/bmp" @"goto-img.bmp"
+IDB_IMG_OPT               1021  IMAGE "image/bmp" @"opt-img.bmp"
+IDB_IMG_HELP              1022  IMAGE "image/bmp" @"help-img.bmp"
+IDB_IMG_BACK              1023  IMAGE "image/bmp" @"back-img.bmp"
+IDB_IMG_STOP              1024  IMAGE "image/bmp" @"stop-img.bmp"
+IDB_IMG_REFRESH           1025  IMAGE "image/bmp" @"refresh-img.bmp"
+IDB_IMG_SSLINFO           1026  IMAGE "image/bmp" @"sslinfo-img.bmp"
+IDB_IMG_INFO              1027  IMAGE "image/bmp" @"info-img.bmp"
+IDB_IMG_BOOKMARKS         1028  IMAGE "image/bmp" @"bkmks-img.bmp"

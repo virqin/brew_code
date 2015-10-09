@@ -1,0 +1,7 @@
+#ifndef BREWSER_BID
+#define BREWSER_BID
+
+#define AEECLSID_BREWSER 0x01012cfc
+
+#endif //BREWSER_BID
+

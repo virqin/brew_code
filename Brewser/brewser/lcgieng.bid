@@ -1,0 +1,6 @@
+#ifndef LCGIENG_BID
+#define LCGIENG_BID
+
+#define AEECLSID_LCGIENG        0x01012cfd
+
+#endif //LCGIENG_BID

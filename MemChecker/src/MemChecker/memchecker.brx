@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="memchecker" VERSION="1">
+<Strings Encoding="Unicode">
+	<String Id="1001" Name="IDS_BEGIN_WATCH">
+		<Text>Begin watch</Text>
+	</String>
+	<String Id="1002" Name="IDS_RUN_AND_WATCH">
+		<Text>Run &amp; watch</Text>
+	</String>
+	<String Id="1003" Name="IDS_ABOUT">
+		<Text>About me</Text>
+	</String>
+</Strings>
+<Objects MimeType="image/png">
+	<Object Id="5001" Name="IDI_BUTTON_BG">
+		<File>.\res\ButtonBG.PNG</File>
+	</Object>
+	<Object Id="5002" Name="IDI_BUTTON_BG_A">
+		<File>.\res\ButtonBG-A.png</File>
+	</Object>
+	<Object Id="5003" Name="IDI_BUTTON_BG_S">
+		<File>.\res\ButtonBG-S.png</File>
+	</Object>
+	<Object Id="5004" Name="IDI_BUTTON_MASK" MimeType="image/bmp">
+		<File>.\res\ButtonMask.bmp</File>
+	</Object>
+</Objects>
+</BREWRes>

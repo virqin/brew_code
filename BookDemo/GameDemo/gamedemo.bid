@@ -1,0 +1,6 @@
+#ifndef GAMEDEMO_BID
+#define GAMEDEMO_BID
+
+#define AEECLSID_GAMEDEMO        0x12001008
+
+#endif //GAMEDEMO_BID

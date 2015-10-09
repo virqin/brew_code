@@ -1,0 +1,19 @@
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=iso-8859-1">
+<html>
+<h2 align=center><img width=20 height=20 src="res:/brewser.bar?1013">&nbsp;Proxies</h2> <a href="lcgi:cfg.{invoke}.proxies.reset">Repor a predefinição</a>
+<form action="lcgi:cfg.{invoke}.proxies.ok">
+<input type=checkbox name=httpon {httpon}>Proxy HTTP<br> Anfitrião<b>:</b> Porta<br>
+<input type=text maxlen=256 size=13 name=httphost value="{httphost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=httpport value="{httpport}"><br>
+<input type=checkbox name=ftpon {ftpon}>Proxy FTP<br> Anfitrião<b>:</b> Porta<br>
+<input type=text maxlen=256 size=13 name=ftphost value="{ftphost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=ftpport value="{ftpport}"><br>
+<input type=checkbox name=gophon {gophon}>Proxy Gopher<br> Anfitrião<b>:</b> Porta<br>
+<input type=text maxlen=256 size=13 name=gophhost value="{gophhost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=gophport value="{gophport}"><br>
+<input type=checkbox name=othon {othon}>Proxy para outros esquemas<br> Anfitrião<b>:</b> Porta<br>
+<input type=text maxlen=256 size=13 name=othhost value="{othhost}"> <b>:</b>
+<input type=text istyle=4 maxlen=16 size=5 name=othport value="{othport}"><br> Esquemas: <br>(lista separada por vírgulas, por ex. "http,ftp")<br>
+<input type=text maxlen=1024 size=50 name=othschm value="{othschm}"><br> <a href="x-submit:">Guardar</a>
+</form>
+</html>

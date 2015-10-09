@@ -1,0 +1,6 @@
+#ifndef EXSPRITE_BID
+#define EXSPRITE_BID
+
+#define AEECLSID_EXSPRITE        0x12001006
+
+#endif //EXSPRITE_BID

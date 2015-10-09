@@ -1,0 +1,6 @@
+#ifndef MEMCHECKER_BID
+#define MEMCHECKER_BID
+
+#define AEECLSID_MEMCHECKER        0x01010188
+
+#endif //MEMCHECKER_BID

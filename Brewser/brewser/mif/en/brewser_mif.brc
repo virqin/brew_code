@@ -1,0 +1,238 @@
+#############################################################################
+#############################################################################
+##
+##              BARC (BREW Application Resource Compiler) File
+##
+#############################################################################
+#############################################################################
+## 
+## Each line of a BARC input file has the form:
+## 
+##    <type> <id> <id_name> <data>
+## 
+## Where:
+##    type    = STRING, IMAGE, BLOB, BINARY or a number between 0 and 65535
+##    id      = an integer id for the resource
+##    id_name = a symbolic, legal-C-preprocessor token name for use in 
+##                the resource header, for "#define id_name id"
+##    data    = for STRING:         <strtype> <SP> <bytes>
+##              for IMAGE and BLOB: <mimetype> <SP> <bytes>
+##              for BINARY:         <bytes>
+##              for a number:       <bytes>
+##    strtype = ISOLATIN1, SJIS, GB3212, KSC5601, or UTF8
+##    bytes   = <quotedtext>, @<quotedfilename>, or =<hexbytes>
+## 
+## 
+## Notes:
+##    * Lines beginning with '#' are treated as comments, comments may also 
+##        appear at the end of a resource line.
+##    * IMAGE and BLOB resources must have mutually unique ids, since
+##        they resolve to type 6.
+##    * Only single-byte string formats are supported.
+##    * quotedtext may contain escape chars \r, \n, \t, octal numbers and 
+##        hex numbers.  To include a ", use \" (just like C)
+##    * arbitrary numbered resource types may be used, but data must be 
+##        specified
+##
+#############################################################################
+
+#############################################################################
+# Binary MIF fields
+#############################################################################
+
+#############################################################################
+#############################################################################
+IDBX_MIF_HEADER       0    20480 =02100000000000000000000000000000000000000000000007000100010001000000060001000000
+#############################################################################
+# MIF header, which has the form:
+#
+#   struct
+#   {
+#     uint32         version;      // MIF version, 0x1002
+#     uint32         dwID;         // MIF ID (matches filename.mif)
+#     byte           bPad[16];     // Padding..
+#     uint16         wPrivLevel;   // Privilidge Level...
+#     // following used to determine the size of associated MIF data...
+#     uint16         wClasses;     // Number of classes exported
+#     uint16         wApplets;     // Number of applets
+#     uint16         wExtClasses;  // Number of classes imported (dependencies)
+#     uint16         wNotify;      // Number of notifications
+#     uint16         wMIMETypes;   // Number of MIME Type handlers
+#     uint16         wPrivClasses; // Number of classes in wClasses 
+#                                  //  that are "privileged", the first 
+#                                  //  wPrivClasses out of wClasses end 
+#                                  //  up "privileged". wPrivClasses must 
+#                                  //  be >= wClasses
+#     uint16         wPad;         // more padding, to keep it the same 
+#                                  //   size as version 0x00001000 MIF
+#   } MIF;
+#
+#  For BREWser, we have:
+#
+#     version      = 0x00001002 (MIF_2_0_B_VERSION)
+#     dwID         = 0x00000000
+#     bPad[16]     = 0x00000000000000000000000000000000
+#     wPrivLevel   = 0x0007     (PL_FILE|PL_NETWORK|PL_TAPI)
+#     wClasses     = 0x0001
+#     wApplets     = 0x0001
+#     wExtClasses  = 0x0001
+#     wNotify      = 0x0000
+#     wMIMETypes   = 0x0006
+#     wPrivClasses = 0x0001
+#     wPad         = 0x0000
+#
+#############################################################################
+
+#############################################################################
+#############################################################################
+IDBX_MIF_CLASSES      1    20480 =FD2C010100000000
+#############################################################################
+# Non-App classes, which has the form:
+#
+#    AEEClsId[wClasses+1]
+#
+# For BREWser, we have: 
+#
+#    [0] = 0x01012CFD   (AEECLSID_LCGIENG)
+#    [1] = 0x00000000   (null term)
+#
+#############################################################################
+
+#############################################################################
+#############################################################################
+IDBX_MIF_APPLETS      2    20480 =FC2C010100000000E80300000000000000004000
+#############################################################################
+# Applet info array, which has the form:
+#
+#   struct
+#   {
+#      AEECLSID       cls;
+#      char          *pszMIF;   // App Resource file (filled by BREW)
+#      uint16         wIDBase;  // Base ID for locating title, icon, etc
+#      uint16         wAppType; // Extended OEM/Carrier App Type
+#      uint16         wPad2;
+#      uint16         wPad3;
+#      uint16         wPad4;
+#      uint16         wFlags;   // Applet Flags (AFLAG_...)
+#   } AEEAppInfo[wApplets];
+#      
+# For BREWser, we have: 
+#
+#   [0] {
+#      cls       = 0x01012CFC (AEECLSID_BREWSER)
+#      pszMIF    = 0x00000000 (unused)
+#      wIDBase   = 0x03E8     (1000)
+#      wAppType  = 0x0000     (unused)
+#      wPad2     = 0x0000     (unused)
+#      wPad3     = 0x0000     (unused)
+#      wPad4     = 0x0000     (unused)
+#      wFlags    = 0x0040     (AFLAG_WEB)
+#   }
+#
+#############################################################################
+
+#############################################################################
+#############################################################################
+IDBX_MIF_EXTCLASSES   3    20480 =FD2C010100000000
+#############################################################################
+# External classes used by this module (dependencies), which has the form:
+#
+#    AEECLSID[wExtClasses+1]
+#
+# For BREWser, we have: 
+#
+#    [0] = 0x01012CFD   (AEECLSID_LCGIENG)
+#    [1] = 0x00000000   (null term)
+#
+#############################################################################
+
+#############################################################################
+#############################################################################
+IDBX_MIF_MIMETYPE     5    20480 =FD2C0101055000016C6367693A00FD2C01010550000174656C3A00FC2C0101000101016874747000FC2C01010001010166696C6500FC2C01010001010166747000FC2C010100010101687474707300
+#############################################################################
+# Registry entries, which has the form:
+#
+#    struct 
+#    {
+#       AEECLSID handler;
+#       AEECLSID type;
+#       char     szMimeType[1]; // over-allocated, null-terminated
+#    } RegEntry[wMIMETypes];
+#
+# For BREWser, we have: 
+#	
+#    [0] {
+#        handler    = 0x01012CFD   (AEECLSID_LCGIENG)
+#        type       = 0x01005005   (AEECLSID_WEBENG)
+#        szMimeType = 6C6367693A00 ("lcgi:")
+#    }
+#    [1] {
+#        handler    = 0x01012CFD   (AEECLSID_LCGIENG)
+#        type       = 0x01005005   (AEECLSID_WEBENG)
+#        szMimeType = 74656C3A00   ("tel:")
+#    }
+#    [2] {
+#        handler    = 0x01012CFC (AEECLSID_BREWSER)
+#        type       = 0x01010100 (AEECLSID_APPLET)
+#        szMimeType = 6874747000 ("http")
+#    }
+#    [3] {
+#        handler    = 0x01012CFC (AEECLSID_BREWSER)
+#        type       = 0x01010100 (AEECLSID_APPLET)
+#        szMimeType = 66696C6500 ("file")
+#    }
+#    [4] {
+#        handler    = 0x01012CFC (AEECLSID_BREWSER)
+#        type       = 0x01010100 (AEECLSID_APPLET)
+#        szMimeType = 66747000 ("ftp")
+#    }
+#    [5] {
+#        handler    = 0x01012CFC (AEECLSID_BREWSER)
+#        type       = 0x01010100 (AEECLSID_APPLET)
+#        szMimeType = 687474707300 ("https")
+#    }
+#
+#############################################################################
+
+
+#############################################################################
+#############################################################################
+IDBX_MIF_FSLIMIT      9    20480 =0000000000000000
+#############################################################################
+# Registry entries, which has the form:
+#
+# struct 
+# {
+#    uint16  wMaxFiles;  // maximum number of files this module may create
+#    uint16  wPad;       // padding..
+#    uint32  dwMaxSpace; // maximum file space this module may consume
+# } MIFFSLimit;
+#
+# For BREWser, we have: 
+#
+#    wMaxFiles   = 0x0000 (unlimited)
+#    wPad        = 0x0000
+#    dwMaxSpace  = 0x00000000 (unlimited)
+#
+#############################################################################
+
+
+#############################################################################
+# Non-binary MIF fields
+#############################################################################
+
+#############################################################################
+# module Company name
+IDS_COMPANY           6   STRING ISOLATIN1  "QUALCOMM Incorporated"
+
+#############################################################################
+#############################################################################
+# 1st application
+# Name
+IDS_NAME           1000   STRING ISOLATIN1  "BREW Browser"
+# 26x26 image, shown in AppMgr icon-mode
+IDB_ICON           1001    IMAGE "image/bmp" @".\\mif\\8bit\\icon.bmp"
+# 65x42 image, shown in upper area in AppMgr full-screen mode
+IDB_IMAGE          1002    IMAGE "image/bmp" @".\\mif\\8bit\\image.bmp"
+# 16x16 image, shown in softkey menu in AppMgr full-screen mode 
+IDB_THUMBNAIL      1003    IMAGE "image/bmp" @".\\mif\\8bit\\image_thumb.bmp" 
