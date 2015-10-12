@@ -1,0 +1,6 @@
+#ifndef C_SAMPLESMS_BID
+#define C_SAMPLESMS_BID
+
+#define AEECLSID_C_SAMPLESMS    	0x0108ff2b
+
+#endif //C_SAMPLESMS_BID

@@ -1,0 +1,6 @@
+#ifndef c_samplecamera_BID
+#define c_samplecamera_BID
+
+#define AEECLSID_C_SAMPLECAMERA        0x008272DA
+
+#endif //c_samplecamera_BID

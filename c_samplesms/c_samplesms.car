@@ -1,0 +1,303 @@
+-- Include Directory = C:\MyWork\SampleApps\ISMS\BMP_version\c_samplesms\c_samplesms\images
+
+ModRsc {
+--
+    name  ="IDS_MESSAGING", 
+    id    = 1001,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Messaging"),
+}
+ModRsc {
+--
+    name  ="IDS_COMPOSE_MSG", 
+    id    = 1002,
+    type  = 1,
+    data  =EncStringRscData(0xff, "1. Compose Message"),
+}
+ModRsc {
+--
+    name  ="IDS_INBOX", 
+    id    = 1003,
+    type  = 1,
+    data  =EncStringRscData(0xff, "2. Inbox (%d/%d)"),
+}
+ModRsc {
+--
+    name  ="IDS_OUTBOX", 
+    id    = 1004,
+    type  = 1,
+    data  =EncStringRscData(0xff, "3. Outbox (%d)"),
+}
+ModRsc {
+--
+    name  ="IDS_DRAFTS", 
+    id    = 1005,
+    type  = 1,
+    data  =EncStringRscData(0xff, "4. Drafts (%d)"),
+}
+ModRsc {
+--
+    name  ="IDS_OK", 
+    id    = 1006,
+    type  = 1,
+    data  =EncStringRscData(0xff, "OK"),
+}
+ModRsc {
+--
+    name  ="IDS_OPTIONS", 
+    id    = 1007,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Options"),
+}
+ModRsc {
+--
+    name  ="IDS_INBOX_TITLE", 
+    id    = 1008,
+    type  = 1,
+    data  =EncStringRscData(0xff, "INBOX"),
+}
+ModRsc {
+--
+    name  ="IDS_OUTBOX_TITLE", 
+    id    = 1009,
+    type  = 1,
+    data  =EncStringRscData(0xff, "OUTBOX"),
+}
+ModRsc {
+--
+    name  ="IDS_DRAFTS_TITLE", 
+    id    = 1010,
+    type  = 1,
+    data  =EncStringRscData(0xff, "DRAFTS"),
+}
+ModRsc {
+--
+    name  ="IDS_SMALL_PIC1", 
+    id    = 1011,
+    type  = 1,
+    data  =EncStringRscData(0xff, "SmallPicture-1"),
+}
+ModRsc {
+--
+    id    = 5001,
+    name  ="IDI_ENV_CLOSED", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("images/envelope_c1.bmp")),
+}
+ModRsc {
+--
+    name  ="IDS_LARGE_PIC1", 
+    id    = 1012,
+    type  = 1,
+    data  =EncStringRscData(0xff, "LargePicture-1"),
+}
+ModRsc {
+--
+    name  ="IDS_SMALL_ANIM1", 
+    id    = 1013,
+    type  = 1,
+    data  =EncStringRscData(0xff, "SmallAnimation-1"),
+}
+ModRsc {
+--
+    name  ="IDS_LARGE_ANIM1", 
+    id    = 1014,
+    type  = 1,
+    data  =EncStringRscData(0xff, "LargeAnimation-1"),
+}
+ModRsc {
+--
+    name  ="IDS_SOUND1", 
+    id    = 1015,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Sound1"),
+}
+ModRsc {
+--
+    name  ="IDS_OBJECTS_LIST", 
+    id    = 1016,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Insert Object:"),
+}
+ModRsc {
+--
+    name  ="IDS_INS_OBJECT", 
+    id    = 1017,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Insert_Object"),
+}
+ModRsc {
+--
+    name  ="IDS_DEL_OBJECT", 
+    id    = 1018,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Del_Object"),
+}
+ModRsc {
+--
+    name  ="IDS_SEND", 
+    id    = 1019,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Send"),
+}
+ModRsc {
+--
+    name  ="IDS_EDIT_MSG", 
+    id    = 1020,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Edit"),
+}
+ModRsc {
+--
+    name  ="IDS_DELETE_MSG", 
+    id    = 1021,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Delete"),
+}
+ModRsc {
+--
+    name  ="IDS_READ_MSG", 
+    id    = 1022,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Read"),
+}
+ModRsc {
+--
+    name  ="IDS_ERASE_INBOX", 
+    id    = 1023,
+    type  = 1,
+    data  =EncStringRscData(0xff, "1. Erase Inbox"),
+}
+ModRsc {
+--
+    name  ="IDS_ERASE_OUTBOX", 
+    id    = 1024,
+    type  = 1,
+    data  =EncStringRscData(0xff, "2. Erase Outbox"),
+}
+ModRsc {
+--
+    name  ="IDS_ERASE_DRAFTS", 
+    id    = 1025,
+    type  = 1,
+    data  =EncStringRscData(0xff, "3. Erase Drafts"),
+}
+ModRsc {
+--
+    name  ="IDS_ERASE_ALL", 
+    id    = 1026,
+    type  = 1,
+    data  =EncStringRscData(0xff, "4. Erase ALL"),
+}
+ModRsc {
+--
+    name  ="IDS_SET_MOSMS_ENC", 
+    id    = 1027,
+    type  = 1,
+    data  =EncStringRscData(0xff, "5. Set MO SMS Encoding"),
+}
+ModRsc {
+--
+    name  ="IDS_SET_SMSSTORAGE", 
+    id    = 1028,
+    type  = 1,
+    data  =EncStringRscData(0xff, "6. Set SMSStorage"),
+}
+ModRsc {
+--
+    name  ="IDS_MESSAGE", 
+    id    = 1029,
+    type  = 1,
+    data  =EncStringRscData(0xff, "%-12s  %-20s"),
+}
+ModRsc {
+--
+    name  ="IDS_TIME_STAMP", 
+    id    = 1030,
+    type  = 1,
+    data  =EncStringRscData(0xff, "%02u/%02u/%02u %02u:%02u"),
+}
+ModRsc {
+--
+    name  ="IDS_COMPOSE_TITLE", 
+    id    = 1031,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Compose Text Message"),
+}
+ModRsc {
+--
+    name  ="IDS_MOENC_OCTET", 
+    id    = 1032,
+    type  = 1,
+    data  =EncStringRscData(0xff, "AEESMS_ENC_OCTET"),
+}
+ModRsc {
+--
+    name  ="IDS_MOENC_ASCII", 
+    id    = 1033,
+    type  = 1,
+    data  =EncStringRscData(0xff, "AEESMS_ENC_ASCII"),
+}
+ModRsc {
+--
+    name  ="IDS_MOENC_UNICODE", 
+    id    = 1034,
+    type  = 1,
+    data  =EncStringRscData(0xff, "AEESMS_ENC_UNICODE"),
+}
+ModRsc {
+--
+    name  ="IDS_MOENC_LATIN", 
+    id    = 1035,
+    type  = 1,
+    data  =EncStringRscData(0xff, "AEESMS_ENC_LATIN"),
+}
+ModRsc {
+--
+    id    = 5002,
+    name  ="IDI_ENV_OPENED", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("images/envelope_o.bmp")),
+}
+ModRsc {
+--
+    id    = 5003,
+    name  ="IDI_ENV_SENT", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("images/envelope_s.bmp")),
+}
+ModRsc {
+--
+    id    = 5004,
+    name  ="IDI_ENV_DRAFT", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("images/envelope_d1.bmp")),
+}
+ModRsc {
+--
+    id    = 5005,
+    name  ="IDI_SMALL_PIC1", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("images/smile1.bmp")),
+}
+ModRsc {
+--
+    id    = 5006,
+    name  ="IDI_LARGE_PIC1", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("images/smile2.bmp")),
+}
+ModRsc {
+--
+    name  ="IDS_MOENC_GSM7BIT", 
+    id    = 1036,
+    type  = 1,
+    data  =EncStringRscData(0xff, "AEESMS_ENC_GSM_7_BIT_DEFAULT"),
+}
+ModRsc {
+--
+    name  ="IDS_SET_MOENC_TITLE", 
+    id    = 1037,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Set MOSMS Enc To:"),
+}

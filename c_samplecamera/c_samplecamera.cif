@@ -1,0 +1,26 @@
+include "c_samplecamera.bid"
+
+
+AEEPRIVID_PLFile = 0x0001 --Declare
+AEECLSID_CAMERA1 = 0x01002013 --Declare
+
+ModRsc {
+   id    = 20,  -- Applet base resource id
+   type  = 1,     -- string resource type AEEResType.h
+   data  = EncStringRscData(0xff, "samplecamera")
+}
+
+ModRsc {
+   id    = 21,
+   type  = 6,
+   data  = ImageRscData("image/png", BytesOfFile("c_samplecamera_ico.png"))
+}
+
+Applet {
+   appletid       =  AEECLSID_C_SAMPLECAMERA,
+   resbaseid      =  20, -- Applet base resource id
+   applethostid   =  0,
+   type           =  0,
+privs = {AEEPRIVID_PLFile,AEECLSID_CAMERA1},
+}
+
