@@ -183,7 +183,7 @@ all :  $(TARGET).$(MODULE)
 #                           MODULE SPECIFIC RULES
 #===============================================================================
 
-APP_OBJS =  AEEAppGen.o AEEModGen.o sampleposdet.o SP_MainMenu.o SP_GetGPSInfo.o SP_Track.o SP_ConfigMenu.o
+APP_OBJS =  AEEAppGen.o AEEModGen.o sampleposdet.o SP_MainMenu.o SP_GetGPSInfo.o SP_Track.o SP_ConfigMenu.o e_asin.o transform.o
 
 #----------------------------------------------------------------------------
 # Target rules

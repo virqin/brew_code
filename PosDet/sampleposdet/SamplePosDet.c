@@ -85,6 +85,7 @@ static boolean SamplePosDet_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPa
    return FALSE;
 }
 
+#include "SP_Track.h"
 /*===========================================================================
 ===========================================================================*/
 static boolean SamplePosDet_InitApplet( CSamplePosDet *pMe )
@@ -94,6 +95,36 @@ static boolean SamplePosDet_InitApplet( CSamplePosDet *pMe )
 
    // Load the GPS settings from the config file, if possible
    SamplePosDet_InitGPSSettings( pMe );
+
+   {
+	   Coordinate c1, c2;
+	   double dis = 0;
+	   char szDis[64];
+	   AECHAR wcharbuf[32];
+	   
+	   //shanghai 31.1774276, 121.5272106
+	   c1.lat = 31.1774276;
+	   c1.lon = 121.5272106;
+	   
+	   //beijing 39.911954, 116.377817
+	   c2.lat = 39.911954;
+	   c2.lon = 116.377817;
+	   
+	   //shenzhen 22.543847, 113.912316
+	   c1.lat = 22.543847;
+	   c1.lon = 113.912316;
+	   dis = Track_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
+	   
+	   
+	   MEMSET(szDis,0,sizeof(szDis));
+	   
+	   FLOATTOWSTR(dis, wcharbuf, 32);
+	   WSTRTOSTR(wcharbuf,szDis, 64);
+	   
+	   DBGPRINTF("Track_cbOrientInfo dis:%s", szDis);
+	   //SamplePosDet_Printf( pMe, 5, 4, AEE_FONT_BOLD, IDF_ALIGN_LEFT|IDF_RECT_FILL, "%s m", szDis );
+	   
+	}
 
    return bRet;
 }

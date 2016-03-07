@@ -100,6 +100,10 @@ SOURCE="$(BREWDIR)\sdk\src\AEEModGen.c"
 # End Source File
 # Begin Source File
 
+SOURCE=.\e_asin.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\SamplePosDet.c
 # End Source File
 # Begin Source File
@@ -118,6 +122,10 @@ SOURCE=.\SP_MainMenu.c
 
 SOURCE=.\SP_Track.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\transform.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -133,6 +141,10 @@ SOURCE=.\sampleposdet_res.h
 # Begin Source File
 
 SOURCE=.\SP_Track.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\transform.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -167,7 +179,7 @@ InputPath=.\sampleposdet.brx
 InputName=sampleposdet
 
 BuildCmds= \
-	$(BREWDIR)\sdk\tools\ResourceEditor\brewrc.exe -s -o $(InputDir)\$(InputName).bar -h $(InputDir)\$(InputPath)_res.h $(InputPath)
+	$(BREWDIR)\tools\ResourceEditor\brewrc.exe -s -o $(InputDir)\$(InputName).bar -h $(InputDir)\$(InputPath)_res.h $(InputPath)
 
 "$(InputDir)\$(InputName).bar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)

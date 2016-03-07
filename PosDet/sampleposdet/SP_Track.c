@@ -18,6 +18,7 @@ GENERAL DESCRIPTION:
 #include "BREWVersion.h"
 #include "AEEStdLib.h"
 #include "SP_Track.h"
+#include "transform.h"
 
 struct _TrackState{
    boolean     bInNotification;     /* When the state machine is notifying the client */
@@ -32,7 +33,10 @@ struct _TrackState{
 /* Private members to work with IPosDet */
    AEECallback cbIntervalTimer;
    AEECallback cbInfo;
+   AEECallback cbOrientInfo;
    AEEGPSInfo theInfo;
+   AEEPositionInfoEx posInfo;
+   AEEOrientationAzimuthInfo orientInfo;
 /**************************/
 
 /* Clients response members. */
@@ -67,9 +71,10 @@ static void Track_Cancel( AEECallback *pcb )
    }
 
    /* Kill any ongoing process */
+   CALLBACK_Cancel( &pts->cbOrientInfo );
    CALLBACK_Cancel( &pts->cbInfo );
    CALLBACK_Cancel( &pts->cbIntervalTimer );
-
+   
    pts->pcbResp->pfnCancel = 0;
    pts->pcbResp->pCancelData = 0;
 
@@ -90,9 +95,23 @@ static void Track_cbInterval( TrackState *pts )
 
    DBGPRINTF( "TRACK : %d %d", pts->bModeAuto, pts->bModeLocal );
 
+   // Request GPSInfo
    if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, 
       AEEGPS_GETINFO_LOCATION|AEEGPS_GETINFO_ALTITUDE, AEEGPS_ACCURACY_LEVEL1, 
       &pts->theInfo, &pts->cbInfo ) ) {
+
+      /* Report a failure and bailout */
+      pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
+
+      Track_Notify( pts );
+
+      Track_Stop( pts );
+
+   }
+
+   // Request Orientation
+   if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetOrientation( pts->pPos, 
+      AEEORIENTATION_REQ_AZIMUTH, &pts->orientInfo, &pts->cbOrientInfo ) ) {
 
       /* Report a failure and bailout */
       pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
@@ -151,7 +170,10 @@ static void Track_cbInfo( TrackState *pts )
       pts->pResp->lon = FASSIGN_INT(pts->theInfo.dwLon);
       pts->pResp->lon = FDIV(pts->pResp->lon, wgsFactor);
 #endif /* MIN_BREW_VERSION 2.1 */
+
       pts->pResp->height = pts->theInfo.wAltitude - 500;
+	  pts->pResp->wAzimuth = pts->orientInfo.wAzimuth;
+	  pts->pResp->velocityHor = FMUL( pts->theInfo.wVelocityHor,0.25);
 
       pts->pResp->dwFixNum++;
 
@@ -202,6 +224,39 @@ static void Track_cbInfo( TrackState *pts )
          }
       }
    }
+}
+
+static void Track_cbOrientInfo( TrackState *pts )
+{
+	DBGPRINTF("Track_cbOrientInfo Degrees:%d.%d", ((uint16)pts->orientInfo.wAzimuth&(~0x3f))>>6, (pts->orientInfo.wAzimuth&0x3f));
+
+#if 0
+	Coordinate c1, c2;
+	double dis = 0;
+	char szDis[64] = {0};
+	AECHAR wcharbuf[32] = {0};	
+
+	//shanghai 31.1774276, 121.5272106
+	c1.lat = 31.1774276;
+	c1.lon = 121.5272106;
+	
+	//beijing 39.911954, 116.377817
+	c2.lat = 39.911954;
+	c2.lon = 116.377817;
+
+	//shenzhen 22.543847, 113.912316
+	//c1.lat = 22.543847;
+	//c1.lon = 113.912316;
+	dis = Track_Calc_Distance(c1, c2);
+
+	
+	MEMSET(szDis,0,sizeof(szDis));
+
+	FLOATTOWSTR(dis, wcharbuf, 32);
+	WSTRTOSTR(wcharbuf,szDis, 64);
+
+	DBGPRINTF("Track_cbOrientInfo dis:%s", szDis);
+#endif
 }
 
 /*======================================================================= 
@@ -268,7 +323,7 @@ int Track_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, TrackState **
 
       CALLBACK_Init( &pts->cbIntervalTimer, Track_cbInterval, pts );
       CALLBACK_Init( &pts->cbInfo, Track_cbInfo, pts );
-
+	  CALLBACK_Init( &pts->cbOrientInfo, Track_cbOrientInfo, pts);
    }
 
    *po = pts;
@@ -314,6 +369,7 @@ int Track_Stop( TrackState *pts )
    pts->bInProgress = FALSE;
 
    /* Kill any ongoing process */
+   CALLBACK_Cancel( &pts->cbOrientInfo);
    CALLBACK_Cancel( &pts->cbInfo );
    CALLBACK_Cancel( &pts->cbIntervalTimer );
 
@@ -381,6 +437,9 @@ int Track_Start( TrackState *pts, TrackType t, int nFixes,
    else {
 
       AEEGPSConfig config;
+
+	  pts->posInfo.dwSize = sizeof(AEEPositionInfoEx);
+	  pts->orientInfo.wSize = sizeof(AEEOrientationAzimuthInfo);
 
       pData->dwFixNum     = 0;
 
@@ -450,4 +509,10 @@ int Track_Start( TrackState *pts, TrackType t, int nFixes,
 
    }
    return nErr;
+}
+
+/* Calculate the distance between A and B */
+double Track_Calc_Distance( double latA, double lngA, double latB, double lngB )
+{
+	return distance(latA, lngA, latB, lngB);
 }

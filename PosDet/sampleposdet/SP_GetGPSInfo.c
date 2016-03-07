@@ -88,6 +88,7 @@ static void SamplePosDet_GetGPSInfo_Paint( CSamplePosDet *pMe, GetGPSInfo_PaintR
 {
    struct _GetGPSInfo *pGetGPSInfo = SamplePosDet_GetScreenData( pMe );
 
+  
    if( rgn == GETGPSINFO_PAINT_ALL ) {
       IDISPLAY_ClearScreen( pMe->theApp.m_pIDisplay );
       SamplePosDet_Printf( pMe, 0, 3, AEE_FONT_BOLD, IDF_ALIGN_LEFT, "GetGPSInfo" );
@@ -125,7 +126,10 @@ static void SamplePosDet_GetGPSInfo_Paint( CSamplePosDet *pMe, GetGPSInfo_PaintR
       WSTR_TO_STR( wcText, latlonStr, MAXTEXTLEN );
       SamplePosDet_Printf( pMe, 4, 4, AEE_FONT_BOLD, IDF_ALIGN_CENTER|IDF_RECT_FILL, "%s d", latlonStr );
 
-      SamplePosDet_Printf( pMe, 5, 4, AEE_FONT_BOLD, IDF_ALIGN_CENTER|IDF_RECT_FILL, "%d m", pGetGPSInfo->theInfo.height );
+	  		  
+      SamplePosDet_Printf( pMe, 5, 4, AEE_FONT_BOLD, IDF_ALIGN_RIGHT|IDF_RECT_FILL, "%d m", pGetGPSInfo->theInfo.height );
+
+	  
       {
          double fv;
          fv = FASSIGN_INT( pGetGPSInfo->dwFixDuration );
@@ -134,7 +138,7 @@ static void SamplePosDet_GetGPSInfo_Paint( CSamplePosDet *pMe, GetGPSInfo_PaintR
          }
          FLOATTOWSTR( fv, wcText, MAXTEXTLEN * sizeof(AECHAR) );
          WSTR_TO_STR( wcText, latlonStr, MAXTEXTLEN );
-         SamplePosDet_Printf( pMe, 6, 4, AEE_FONT_BOLD, IDF_ALIGN_CENTER|IDF_RECT_FILL, "Avg %ss", latlonStr );   
+         SamplePosDet_Printf( pMe, 6, 4, AEE_FONT_BOLD, IDF_ALIGN_RIGHT|IDF_RECT_FILL, "Avg %ss", latlonStr );   
       }
    }
 
@@ -147,6 +151,47 @@ static void SamplePosDet_GetGPSInfo_Paint( CSamplePosDet *pMe, GetGPSInfo_PaintR
       SamplePosDet_Printf( pMe, 7, 4, AEE_FONT_NORMAL, IDF_ALIGN_BOTTOM|IDF_ALIGN_CENTER|IDF_RECT_FILL, 
          ".....%d.....", pGetGPSInfo->wProgress );
    }
+
+   if (FABS(pGetGPSInfo->theInfo.lat) > 0)
+   {
+	   Coordinate c1, c2;
+	   double dis = 0;
+	   char szDis[64];
+	   AECHAR wcharbuf[32];
+	   
+	   //shanghai 31.1774276, 121.5272106
+	   c1.lat = 31.1774276;
+	   c1.lon = 121.5272106;
+	   
+	   //beijing 39.911954, 116.377817
+	   c2.lat = 39.911954;
+	   c2.lon = 116.377817;
+	   
+	   //shenzhen 22.543847, 113.912316
+	   //c1.lat = 22.543847;
+	   //c1.lon = 113.912316;
+	   c1.lat = pGetGPSInfo->theInfo.lat;
+	   c1.lon = pGetGPSInfo->theInfo.lon;
+
+	   dis = Track_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
+	   
+	   
+	   MEMSET(szDis,0,sizeof(szDis));
+	   
+	   FLOATTOWSTR(dis, wcharbuf, 32);
+	   WSTRTOSTR(wcharbuf,szDis, 64);
+	   
+	   DBGPRINTF("Track_cbOrientInfo dis:%s", szDis);
+	   SamplePosDet_Printf( pMe, 7, 4, AEE_FONT_BOLD, IDF_ALIGN_LEFT|IDF_RECT_FILL, "%s m", szDis );
+	   
+	  }
+	  {
+		  uint16 d1 = 0;
+		  uint8 d2 = 0;
+		  d1 = ((uint16)(pGetGPSInfo->theInfo.wAzimuth & (~0x3f)))>>6;
+		  d2 = (uint8)(pGetGPSInfo->theInfo.wAzimuth & 0x3f);
+		  SamplePosDet_Printf( pMe, 8, 4, AEE_FONT_BOLD, IDF_ALIGN_LEFT|IDF_RECT_FILL, "Head %d.%d", d1, d2 );   
+	  }
 
 }
 
