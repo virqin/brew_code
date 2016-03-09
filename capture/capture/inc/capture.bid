@@ -1,0 +1,6 @@
+#ifndef CAPTURE_BID
+#define CAPTURE_BID
+
+#define AEECLSID_CAPTURE    	0x01035d31
+
+#endif //CAPTURE_BID

@@ -1,0 +1,36 @@
+#ignore .metadata
+.metadata
+#ignore obj and lib file
+*.[oa]
+
+#ignore temp files
+*.swp
+*.temp
+*.tmp
+
+#ignore visualstudio tmp files
+*.elf
+*.lib
+*.suo
+*.ncb
+*.exp
+*.ilk
+*.pdb
+*.sdf
+*.bak
+*.dep
+*.sbr
+*.obj
+*.idb
+*.opt
+*.plg
+*.positions
+
+*.opensdf
+/capture/Debug/
+/capture/snap/
+
+#
+*..dir.dat
+/shared/
+/brewappmgr/
