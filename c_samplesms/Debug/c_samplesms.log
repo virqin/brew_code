@@ -1,0 +1,13 @@
+﻿生成启动时间为 2016/3/9 17:54:47。
+     1>项目“F:\q3\brew_code\c_samplesms\c_samplesms.vcxproj”在节点 2 上(Build 个目标)。
+     1>Link:
+         c_samplesms.vcxproj -> F:\q3\brew_code\c_samplesms\Debug\c_samplesms.dll
+       PostBuildEvent:
+         copy "F:\q3\brew_code\c_samplesms\Debug\c_samplesms.dll" "F:\q3\brew_code\c_samplesms\c_samplesms.dll"
+         :VCEnd
+         已复制         1 个文件。
+     1>已完成生成项目“F:\q3\brew_code\c_samplesms\c_samplesms.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:00.33

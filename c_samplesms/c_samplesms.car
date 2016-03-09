@@ -79,13 +79,6 @@ ModRsc {
 }
 ModRsc {
 --
-    id    = 5001,
-    name  ="IDI_ENV_CLOSED", 
-    type  = 6,
-    data  =ImageRscData("image/bmp", BytesOfFile("images/envelope_c1.bmp")),
-}
-ModRsc {
---
     name  ="IDS_LARGE_PIC1", 
     id    = 1012,
     type  = 1,
@@ -254,6 +247,27 @@ ModRsc {
 }
 ModRsc {
 --
+    name  ="IDS_MOENC_GSM7BIT", 
+    id    = 1036,
+    type  = 1,
+    data  =EncStringRscData(0xff, "AEESMS_ENC_GSM_7_BIT_DEFAULT"),
+}
+ModRsc {
+--
+    name  ="IDS_SET_MOENC_TITLE", 
+    id    = 1037,
+    type  = 1,
+    data  =EncStringRscData(0xff, "Set MOSMS Enc To:"),
+}
+ModRsc {
+--
+    id    = 5001,
+    name  ="IDI_ENV_CLOSED", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("images/envelope_c1.bmp")),
+}
+ModRsc {
+--
     id    = 5002,
     name  ="IDI_ENV_OPENED", 
     type  = 6,
@@ -286,18 +300,4 @@ ModRsc {
     name  ="IDI_LARGE_PIC1", 
     type  = 6,
     data  =ImageRscData("image/bmp", BytesOfFile("images/smile2.bmp")),
-}
-ModRsc {
---
-    name  ="IDS_MOENC_GSM7BIT", 
-    id    = 1036,
-    type  = 1,
-    data  =EncStringRscData(0xff, "AEESMS_ENC_GSM_7_BIT_DEFAULT"),
-}
-ModRsc {
---
-    name  ="IDS_SET_MOENC_TITLE", 
-    id    = 1037,
-    type  = 1,
-    data  =EncStringRscData(0xff, "Set MOSMS Enc To:"),
 }

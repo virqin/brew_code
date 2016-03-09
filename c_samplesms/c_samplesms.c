@@ -21,7 +21,7 @@ DESCRIPTION:
    initialization, application event handler, and application user interface.
 
 
-                  Copyright © 2008 QUALCOMM Incorporated.
+                  Copyright ?2008 QUALCOMM Incorporated.
                            All Rights Reserved.
                         QUALCOMM Proprietary/GTDR
 ===========================================================================*/

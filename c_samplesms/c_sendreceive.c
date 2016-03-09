@@ -22,7 +22,7 @@ DESCRIPTION:
    a message.
 
 
-                 Copyright © 2008 QUALCOMM Incorporated.
+                 Copyright ?2008 QUALCOMM Incorporated.
                         All Rights Reserved.
                      QUALCOMM Proprietary/GTDR
 ===========================================================================*/

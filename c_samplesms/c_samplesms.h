@@ -14,7 +14,7 @@ DESCRIPTION:
    for c_samplesms/c_samplesms.c
 
 
-        Copyright © 2008 QUALCOMM Incorporated.
+        Copyright ?2008 QUALCOMM Incorporated.
                All Rights Reserved.
             QUALCOMM Proprietary/GTDR
 =====================================================================*/
