@@ -93,13 +93,15 @@ static void Track_cbInterval( TrackState *pts )
       return;
    }
 
-   DBGPRINTF( "TRACK : %d %d", pts->bModeAuto, pts->bModeLocal );
+   DBGPRINTF( "TRACK : bAuto:%d bLocal:%d", pts->bModeAuto, pts->bModeLocal );
 
    // Request GPSInfo
    if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, 
       AEEGPS_GETINFO_LOCATION|AEEGPS_GETINFO_ALTITUDE, AEEGPS_ACCURACY_LEVEL1, 
       &pts->theInfo, &pts->cbInfo ) ) {
 
+	  DBGPRINTF( "IPOSDET_GetGPSInfo Failed!");
+	  
       /* Report a failure and bailout */
       pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
 
@@ -113,12 +115,14 @@ static void Track_cbInterval( TrackState *pts )
    if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetOrientation( pts->pPos, 
       AEEORIENTATION_REQ_AZIMUTH, &pts->orientInfo, &pts->cbOrientInfo ) ) {
 
+	  DBGPRINTF( "IPOSDET_GetOrientation Failed!");
+	  
       /* Report a failure and bailout */
-      pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
+      //pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
 
-      Track_Notify( pts );
+      //Track_Notify( pts );
 
-      Track_Stop( pts );
+      //Track_Stop( pts );
 
    }
 }
@@ -171,8 +175,9 @@ static void Track_cbInfo( TrackState *pts )
       pts->pResp->lon = FDIV(pts->pResp->lon, wgsFactor);
 #endif /* MIN_BREW_VERSION 2.1 */
 
-      pts->pResp->height = pts->theInfo.wAltitude - 500;
+    pts->pResp->height = pts->theInfo.wAltitude - 500;
 	  pts->pResp->wAzimuth = pts->orientInfo.wAzimuth;
+	  pts->pResp->heading = pts->theInfo.wHeading;
 	  pts->pResp->velocityHor = FMUL( pts->theInfo.wVelocityHor,0.25);
 
       pts->pResp->dwFixNum++;

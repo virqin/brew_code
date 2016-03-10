@@ -152,7 +152,7 @@ static void SamplePosDet_GetGPSInfo_Paint( CSamplePosDet *pMe, GetGPSInfo_PaintR
          ".....%d.....", pGetGPSInfo->wProgress );
    }
 
-   if (FABS(pGetGPSInfo->theInfo.lat) > 0)
+   //if (FABS(pGetGPSInfo->theInfo.lat) > 0)
    {
 	   Coordinate c1, c2;
 	   double dis = 0;
@@ -191,6 +191,7 @@ static void SamplePosDet_GetGPSInfo_Paint( CSamplePosDet *pMe, GetGPSInfo_PaintR
 		  d1 = ((uint16)(pGetGPSInfo->theInfo.wAzimuth & (~0x3f)))>>6;
 		  d2 = (uint8)(pGetGPSInfo->theInfo.wAzimuth & 0x3f);
 		  SamplePosDet_Printf( pMe, 8, 4, AEE_FONT_BOLD, IDF_ALIGN_LEFT|IDF_RECT_FILL, "Head %d.%d", d1, d2 );   
+		  SamplePosDet_Printf( pMe, 9, 4, AEE_FONT_BOLD, IDF_ALIGN_LEFT|IDF_RECT_FILL, "Heading %d", pGetGPSInfo->theInfo.heading);  
 	  }
 
 }

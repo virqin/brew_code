@@ -35,6 +35,7 @@ typedef struct {
    double lon;       /* longitude on WGS-84 Geoid */
    short  height;    /* Height from WGS-84 Geoid */
    double velocityHor; /* Horizontal velocity, meters/second*/
+   uint16 heading;	/*  Heading, 360/2^10 degrees  */
    uint16 wAzimuth;	 /* Angle 0 - 359 degress and 59 arcminutes. 
 						bits 0-5 contain arcminutes bits 6-15 contain degrees. 
 						This is the heading angle in the local horizontal plane measured clockwise from true North  */
