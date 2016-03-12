@@ -40,7 +40,7 @@ SDKHOME	= $(BREWDIR)\sdk
 
 TARGET     	= samplesms#           		# Target name for output files and object dir
 OBJSDIR		= objs
-TARGETDIR	= samplesms				# Target dir
+TARGETDIR	= c_samplesms				# Target dir
 
 #-------------------------------------------------------------------------------
 # Local compile option
