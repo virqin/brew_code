@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{12b53384-b273-494b-b27b-ca00c0db79d5}</UniqueIdentifier>
+      <Extensions>cpp;c</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{076498b2-e9f4-4b1b-b270-702d9ead398a}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{6a8947c3-ab4f-48cb-81cc-2cf2dc11537d}</UniqueIdentifier>
+      <Extensions>cif;car;ico;png;bmp;gif;jpg;jpeg</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AEEAppGen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AEEModGen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c_conversionEmsObj.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c_samplesms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c_sendreceive.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c_smsstorage.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="c_conversionEmsObj.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c_samplesms.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c_sendreceive.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c_smsstorage.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c_samplesms_res.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="c_samplesms.bid">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="c_samplesms_ico.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

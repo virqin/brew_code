@@ -1,0 +1,68 @@
+include "c_samplesms.bid"
+
+-- Include Directory = C:\MyWork\SampleApps\ISMS\BMP_version\c_samplesms\c_samplesms\appicons
+
+AEEPRIVID_PLTapi = 0x0004 --Declare
+AEECLSID_SMSMAINCLIENT = 0x0100500e --Declare
+
+ModRsc {
+    name  ="IDS_STRING_6", 
+    id    = 6,
+    type  = 1,
+    data  =EncStringRscData(0xFF, "Qualcomm, Inc."),
+}
+
+ModRsc {
+    name  ="IDS_STRING_7", 
+    id    = 7,
+    type  = 1,
+    data  =EncStringRscData(0xFF, "2008"),
+}
+
+ModRsc {
+    name  ="IDS_STRING_8", 
+    id    = 8,
+    type  = 1,
+    data  =EncStringRscData(0xFF, "1.0.0"),
+}
+
+Applet { 
+    appletid       =AEECLSID_C_SAMPLESMS,
+    resbaseid      =20,
+    applethostid   =  0,
+    type           =  0,
+privs = {AEEPRIVID_PLTapi},
+}
+
+ModRsc {
+    name  ="IDS_STRING_20", 
+    id    = 20,
+    type  = 1,
+    data  =EncStringRscData(0xFF, "SAMPLESMS"),
+}
+
+ModRsc {
+    id    = 21,
+    name  ="IDI_OBJECT_21", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("appicons/smsicon_s1.bmp")),
+}
+
+ModRsc {
+    id    = 23,
+    name  ="IDI_OBJECT_23", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("appicons/smsicon_m1.bmp")),
+}
+
+ModRsc {
+    id    = 22,
+    name  ="IDI_OBJECT_22", 
+    type  = 6,
+    data  =ImageRscData("image/bmp", BytesOfFile("appicons/smsicon_l1.bmp")),
+}
+
+Dependencies{
+    AEECLSID_SMSMAINCLIENT
+}
+
