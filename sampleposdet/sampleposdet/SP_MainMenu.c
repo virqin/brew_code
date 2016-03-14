@@ -1,7 +1,7 @@
 /*======================================================
 FILE:  SP_MainMenu.c
 
-        Copyright © 2003 QUALCOMM Incorporated.
+        Copyright ?2003 QUALCOMM Incorporated.
                All Rights Reserved.
             QUALCOMM Proprietary/GTDR
 =====================================================*/
@@ -64,7 +64,12 @@ boolean SamplePosDet_MainMenu_HandleEvent( CSamplePosDet *pMe, AEEEvent eCode,
       }
       break;
 
-   case EVT_KEY:
+    case EVT_KEY:
+	   if (wParam == AVK_SOFT2)
+	   {
+		   ISHELL_CloseApplet(pMe->theApp.m_pIShell, FALSE);
+		   return TRUE;
+	   }
    case EVT_KEY_PRESS:
    case EVT_KEY_RELEASE:
       bHandled = IMENUCTL_HandleEvent( pMenuCtl, eCode, wParam, dwParam );

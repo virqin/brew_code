@@ -10,7 +10,7 @@ GENERAL DESCRIPTION:
 	Sample code to demonstrate services of IPosDet. See SP_Track.h for the
    description of exported functions.
 
-        Copyright © 2003 QUALCOMM Incorporated.
+        Copyright ?2003 QUALCOMM Incorporated.
                All Rights Reserved.
             QUALCOMM Proprietary/GTDR
 =====================================================*/
@@ -100,7 +100,7 @@ static void Track_cbInterval( TrackState *pts )
       AEEGPS_GETINFO_LOCATION|AEEGPS_GETINFO_ALTITUDE, AEEGPS_ACCURACY_LEVEL1, 
       &pts->theInfo, &pts->cbInfo ) ) {
 
-	  DBGPRINTF( "IPOSDET_GetGPSInfo Failed!");
+	  DBGPRINTF( "@IPOSDET_GetGPSInfo Failed!");
 	  
       /* Report a failure and bailout */
       pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
@@ -112,10 +112,10 @@ static void Track_cbInterval( TrackState *pts )
    }
 
    // Request Orientation
-   if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetOrientation( pts->pPos, 
-      AEEORIENTATION_REQ_AZIMUTH, &pts->orientInfo, &pts->cbOrientInfo ) ) {
+   //if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetOrientation( pts->pPos, 
+   //  AEEORIENTATION_REQ_AZIMUTH, &pts->orientInfo, &pts->cbOrientInfo ) ) {
 
-	  DBGPRINTF( "IPOSDET_GetOrientation Failed!");
+   //	  DBGPRINTF( "IPOSDET_GetOrientation Failed!");
 	  
       /* Report a failure and bailout */
       //pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
@@ -124,7 +124,7 @@ static void Track_cbInterval( TrackState *pts )
 
       //Track_Stop( pts );
 
-   }
+   //}
 }
 
 static void Track_Network( TrackState *pts )
@@ -213,6 +213,8 @@ static void Track_cbInfo( TrackState *pts )
 
       else { 
          
+		  DBGPRINTF("@Track_cbInfo status:%u", pts->theInfo.status);
+
          /* Inform the application of failure code. */
          pts->pResp->nErr = pts->theInfo.status;
          
@@ -224,7 +226,7 @@ static void Track_cbInfo( TrackState *pts )
             Track_cbInterval( pts );
          }
          else {
-            
+			 
             Track_Stop( pts );
          }
       }
@@ -370,6 +372,8 @@ int Track_Stop( TrackState *pts )
    if( !pts ) {
       return EBADPARM;
    }
+
+   DBGPRINTF("@Track_Stop");
 
    pts->bInProgress = FALSE;
 

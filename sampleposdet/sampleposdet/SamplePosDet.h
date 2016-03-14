@@ -1,7 +1,7 @@
 /*======================================================
 FILE:  SamplePosDet.h
 
-        Copyright © 2003 QUALCOMM Incorporated.
+        Copyright ?2003 QUALCOMM Incorporated.
                All Rights Reserved.
             QUALCOMM Proprietary/GTDR
 =====================================================*/

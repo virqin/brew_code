@@ -1,7 +1,7 @@
 /*======================================================
 FILE:  SP_GetGPSInfo.c
 
-        Copyright © 2003 QUALCOMM Incorporated.
+        Copyright ?2003 QUALCOMM Incorporated.
                All Rights Reserved.
             QUALCOMM Proprietary/GTDR
 =====================================================*/
@@ -58,6 +58,7 @@ static void SamplePosDet_GetGPSInfo_Callback( CSamplePosDet *pMe )
       rgn = GETGPSINFO_PAINT_FIXCOUNT;
    }
    else {
+	   DBGPRINTF("@Something is not right here. Requires corrective action. Bailout");
       /* Something is not right here. Requires corrective action. Bailout */
       pGetGPSInfo->bAbort = TRUE;
       rgn = GETGPSINFO_PAINT_ERROR;
@@ -287,8 +288,21 @@ boolean SamplePosDet_GetGPSInfo_HandleEvent( CSamplePosDet *pMe, AEEEvent eCode,
       break;
 
    case EVT_KEY:
-      if( wParam == AVK_CLR ) {
+      if( wParam == AVK_CLR || wParam == AVK_SOFT2) {
+
+		 Track_Stop(pGetGPSInfo->pts);
+
+		if (pGetGPSInfo) {
+			if (pGetGPSInfo->pPosDet) {
+				CALLBACK_Cancel(&pGetGPSInfo->cbProgressTimer);
+				CALLBACK_Cancel(&pGetGPSInfo->cbPosDet);
+				IPOSDET_Release(pGetGPSInfo->pPosDet);
+			}
+			FREE(pGetGPSInfo);
+		}
+
          SamplePosDet_GotoScreen( pMe, SCREENID_MAINMENU, 0 );
+
          bHandled = TRUE;
       }
       break;
