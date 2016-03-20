@@ -1,0 +1,6 @@
+#ifndef MYILICENSE_BID
+#define MYILICENSE_BID
+
+#define AEECLSID_MYILICENSE        0x9000000F
+
+#endif //MYILICENSE_BID

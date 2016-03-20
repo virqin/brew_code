@@ -1,0 +1,504 @@
+/*===========================================================================
+
+FILE: mycamera.c
+===========================================================================*/
+
+
+/*===============================================================================
+INCLUDES AND VARIABLE DEFINITIONS
+=============================================================================== */
+#include "AEEModGen.h"          // Module interface definitions
+#include "AEEAppGen.h"          // Applet interface definitions
+#include "AEEShell.h"           // Shell interface definitions
+#include "AEEMenu.h"
+#include "AEECamera.h"	
+
+#include "mycamera.bid"
+
+/*-------------------------------------------------------------------
+Applet structure. All variables in here are reference via "pMe->"
+-------------------------------------------------------------------*/
+// create an applet structure that's passed around. All variables in
+// here will be able to be referenced as static.
+typedef struct _mycamera {
+	AEEApplet      a ;	       // First element of this structure must be AEEApplet
+    AEEDeviceInfo  DeviceInfo; // always have access to the hardware device information
+    IDisplay      *pIDisplay;  // give a standard way to access the Display interface
+    IShell        *pIShell;    // give a standard way to access the Shell interface
+	IMenuCtl	  *m_pIMainMenu;	// Main Menu
+	ICamera		  *m_pICamera;
+	IStatic       *m_pIStatic;
+	uint16		   status;
+} mycamera;
+
+#define MC_CAPTURE_SIZE_X	320
+#define MC_CAPTURE_SIZE_Y	240
+
+#define MC_MAIN		1000
+#define MC_START	1001
+#define MC_HELP		1002
+#define MC_ABOUT	1003
+#define MC_EXIT		1004
+
+/*-------------------------------------------------------------------
+Function Prototypes
+-------------------------------------------------------------------*/
+static  boolean mycamera_HandleEvent(mycamera* pMe, 
+                                                   AEEEvent eCode, uint16 wParam, 
+                                                   uint32 dwParam);
+boolean mycamera_InitAppData(mycamera* pMe);
+void    mycamera_FreeAppData(mycamera* pMe);
+static void BuildMainMenu(mycamera* pMe);
+static void CameraNotify(void* pUser, AEECameraNotify *pn); 
+static void StartCamera(mycamera* pMe);
+static void DisplayText(mycamera *pMe, AECHAR * title, AECHAR * text);
+static void Preview(void * pUser);
+
+/*===============================================================================
+FUNCTION DEFINITIONS
+=============================================================================== */
+
+/*===========================================================================
+FUNCTION: AEEClsCreateInstance
+
+DESCRIPTION
+	This function is invoked while the app is being loaded. All Modules must provide this 
+	function. Ensure to retain the same name and parameters for this function.
+	In here, the module must verify the ClassID and then invoke the AEEApplet_New() function
+	that has been provided in AEEAppGen.c. 
+
+   After invoking AEEApplet_New(), this function can do app specific initialization. In this
+   example, a generic structure is provided so that app developers need not change app specific
+   initialization section every time except for a call to IDisplay_InitAppData(). 
+   This is done as follows: InitAppData() is called to initialize AppletData 
+   instance. It is app developers responsibility to fill-in app data initialization 
+   code of InitAppData(). App developer is also responsible to release memory 
+   allocated for data contained in AppletData -- this can be done in 
+   IDisplay_FreeAppData().
+
+PROTOTYPE:
+   int AEEClsCreateInstance(AEECLSID ClsId,IShell * pIShell,IModule * po,void ** ppObj)
+
+PARAMETERS:
+	clsID: [in]: Specifies the ClassID of the applet which is being loaded
+
+	pIShell: [in]: Contains pointer to the IShell object. 
+
+	pIModule: pin]: Contains pointer to the IModule object to the current module to which
+	this app belongs
+
+	ppObj: [out]: On return, *ppObj must point to a valid IApplet structure. Allocation
+	of memory for this structure and initializing the base data members is done by AEEApplet_New().
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  AEE_SUCCESS: If the app needs to be loaded and if AEEApplet_New() invocation was
+     successful
+  EFAILED: If the app does not need to be loaded or if errors occurred in 
+     AEEApplet_New(). If this function returns FALSE, the app will not be loaded.
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+int AEEClsCreateInstance(AEECLSID ClsId, IShell *pIShell, IModule *po, void **ppObj)
+{
+	*ppObj = NULL;
+
+	if( ClsId == AEECLSID_MYCAMERA )
+	{
+		// Create the applet and make room for the applet structure
+		if( AEEApplet_New(sizeof(mycamera),
+                          ClsId,
+                          pIShell,
+                          po,
+                          (IApplet**)ppObj,
+                          (AEEHANDLER)mycamera_HandleEvent,
+                          (PFNFREEAPPDATA)mycamera_FreeAppData) ) // the FreeAppData function is called after sending EVT_APP_STOP to the HandleEvent function
+                          
+		{
+			//Initialize applet data, this is called before sending EVT_APP_START
+            // to the HandleEvent function
+			if(mycamera_InitAppData((mycamera*)*ppObj))
+			{
+				//Data initialized successfully
+				return(AEE_SUCCESS);
+			}
+			else
+			{
+				//Release the applet. This will free the memory allocated for the applet when
+				// AEEApplet_New was called.
+				IAPPLET_Release((IApplet*)*ppObj);
+				return EFAILED;
+			}
+
+        } // end AEEApplet_New
+
+    }
+
+	return(EFAILED);
+}
+
+
+/*===========================================================================
+FUNCTION SampleAppWizard_HandleEvent
+
+DESCRIPTION
+	This is the EventHandler for this app. All events to this app are handled in this
+	function. All APPs must supply an Event Handler.
+
+PROTOTYPE:
+	boolean SampleAppWizard_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+
+PARAMETERS:
+	pi: Pointer to the AEEApplet structure. This structure contains information specific
+	to this applet. It was initialized during the AEEClsCreateInstance() function.
+
+	ecode: Specifies the Event sent to this applet
+
+   wParam, dwParam: Event specific data.
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  TRUE: If the app has processed the event
+  FALSE: If the app did not process the event
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+static boolean mycamera_HandleEvent(mycamera* pMe, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+{  
+	if (pMe->m_pIMainMenu && IMENUCTL_HandleEvent(pMe->m_pIMainMenu, eCode, wParam, dwParam) )
+		return TRUE;
+
+    switch (eCode) 
+	{
+        // App is told it is starting up
+        case EVT_APP_START:                        
+		    BuildMainMenu(pMe);
+            return(TRUE);
+
+        // App is told it is exiting
+        case EVT_APP_STOP:
+            // Add your code here...
+      		return(TRUE);
+
+        // App is being suspended 
+        case EVT_APP_SUSPEND:
+		    // Add your code here...
+      		return(TRUE);
+
+        // App is being resumed
+        case EVT_APP_RESUME:
+		    // Add your code here...
+      		return(TRUE);
+
+		case EVT_APP_NO_SLEEP:
+			return TRUE;
+
+        // A key was pressed. Look at the wParam above to see which key was pressed. The key
+        // codes are in AEEVCodes.h. Example "AVK_1" means that the "1" key was pressed.
+        case EVT_KEY:
+		    // Add your code here...
+			if (AVK_SELECT == wParam && MC_START == pMe->status)
+			{
+//lab 3			
+				int16 mode;
+				boolean paused;
+
+				ICAMERA_GetMode(pMe->m_pICamera, &mode, &paused);
+
+				if (CAM_MODE_PREVIEW == mode)
+					ICAMERA_Stop(pMe->m_pICamera);
+//end of lab 3	
+				return TRUE;
+			}
+
+			if((AVK_CLR == wParam) && (MC_MAIN != pMe->status)) 
+			{
+				if (pMe->m_pIStatic)
+				{
+					ISTATIC_Release(pMe->m_pIStatic);
+					pMe->m_pIStatic = NULL;
+				}
+
+				if(MC_START == pMe->status)
+				{ 
+					int16 mode;
+					boolean paused;
+					
+//lab 3
+					ISHELL_CancelTimer(pMe->pIShell, Preview, (void *)pMe);
+//end of lab 3
+					ICAMERA_GetMode(pMe->m_pICamera, &mode, &paused);
+					if (CAM_MODE_PREVIEW == mode)
+						ICAMERA_Stop(pMe->m_pICamera);
+					ICAMERA_Release(pMe->m_pICamera);
+					pMe->m_pICamera = NULL;
+				}
+
+				pMe->status = MC_MAIN;
+				IMENUCTL_SetActive(pMe->m_pIMainMenu, TRUE);
+				IMENUCTL_Redraw(pMe->m_pIMainMenu);
+				return TRUE;
+			}
+			else //When the user press clear key and the current page is main menu, the application should exit.
+				return FALSE;
+
+			case EVT_COMMAND:
+				switch(wParam) 
+				{
+				case MC_START:
+					pMe->status = MC_START;
+					IMENUCTL_SetActive(pMe->m_pIMainMenu, FALSE);
+					IDISPLAY_ClearScreen(pMe->pIDisplay);
+					IDISPLAY_UpdateEx(pMe->pIDisplay, TRUE);
+					StartCamera(pMe);
+					Preview((void *)pMe);
+					return TRUE;
+					
+				case MC_HELP:
+					pMe->status = MC_HELP;
+					DisplayText(pMe, (AECHAR*)L"Help", (AECHAR*)L"This is a sample to show how to use ICamera interface to control the camera in your phone. The usage is very simple, just press OK key to take pictures in Start Camera."); 
+					return TRUE;
+
+				case MC_ABOUT:
+					pMe->status = MC_ABOUT;
+					DisplayText(pMe, (AECHAR*)L"About", (AECHAR*)L"My Camera, version 1.0.0, Copyright by UNIBREW.");
+					return TRUE;
+
+				case MC_EXIT:
+					pMe->status = MC_EXIT;
+					ISHELL_CloseApplet(pMe->pIShell, FALSE);
+					return TRUE;
+				default:
+					break;
+				}
+
+        // If nothing fits up to this point then we'll just break out
+        default:
+            break;
+   }
+
+   return FALSE;
+}
+
+
+// this function is called when your application is starting up
+boolean mycamera_InitAppData(mycamera* pMe)
+{
+    // Get the device information for this handset.
+    // Reference all the data by looking at the pMe->DeviceInfo structure
+    // Check the API reference guide for all the handy device info you can get
+    pMe->DeviceInfo.wStructSize = sizeof(pMe->DeviceInfo);
+    ISHELL_GetDeviceInfo(pMe->a.m_pIShell,&pMe->DeviceInfo);
+
+    // The display and shell interfaces are always created by
+    // default, so we'll asign them so that you can access
+    // them via the standard "pMe->" without the "a."
+    pMe->pIDisplay = pMe->a.m_pIDisplay;
+    pMe->pIShell   = pMe->a.m_pIShell;
+
+    // Insert your code here for initializing or allocating resources...
+
+	pMe->m_pICamera = NULL;
+	pMe->m_pIMainMenu = NULL;
+	pMe->m_pIStatic = NULL;
+	pMe->status = MC_MAIN;
+
+	if (SUCCESS != ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void **)&pMe->m_pIMainMenu))
+		return FALSE;
+
+    // if there have been no failures up to this point then return success
+    return TRUE;
+}
+
+// this function is called when your application is exiting
+void mycamera_FreeAppData(mycamera* pMe)
+{
+    // insert your code here for freeing any resources you have allocated...
+
+    // example to use for releasing each interface:
+    // if ( pMe->pIMenuCtl != NULL )         // check for NULL first
+    // {
+    //    IMENUCTL_Release(pMe->pIMenuCtl)   // release the interface
+    //    pMe->pIMenuCtl = NULL;             // set to NULL so no problems trying to free later
+    // }
+    //
+
+	if (pMe->m_pIMainMenu)
+	{
+		IMENUCTL_Release(pMe->m_pIMainMenu);
+		pMe->m_pIMainMenu = NULL;
+	}
+
+	if (pMe->m_pIStatic)
+	{
+		ISTATIC_Release(pMe->m_pIStatic);
+		pMe->m_pIStatic = NULL;
+	}
+
+	if (pMe->m_pICamera)
+	{
+		ICAMERA_Release(pMe->m_pICamera);
+		pMe->m_pICamera = NULL;
+	}
+
+}
+
+static void BuildMainMenu(mycamera* pMe)
+{
+	AEERect rect;
+
+	pMe->status = MC_MAIN;
+
+	SETAEERECT(&rect, 0, 0, pMe->DeviceInfo.cxScreen, pMe->DeviceInfo.cyScreen);
+
+	IMENUCTL_SetRect(pMe->m_pIMainMenu, &rect);
+
+	// Set Title
+	IMENUCTL_SetTitle(pMe->m_pIMainMenu, NULL, 0, (AECHAR*)L"MyCamera Sample");
+
+	//Add individual entries to the Menu
+
+    IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, MC_START, (AECHAR *)L"Start Camera", 0);	
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, MC_HELP, (AECHAR *)L"Help", 0);
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, MC_ABOUT, (AECHAR *)L"About", 0);
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, MC_EXIT, (AECHAR *)L"Exit", 0);
+
+	IMENUCTL_SetActive(pMe->m_pIMainMenu,TRUE);
+}
+
+static void DisplayText(mycamera *pMe, AECHAR * title, AECHAR * text)
+{
+	AEERect       rect;
+
+	if (NULL == pMe->m_pIStatic)
+	{
+		if (SUCCESS != ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&pMe->m_pIStatic))
+			return;
+	}
+
+	if (pMe->m_pIMainMenu && IMENUCTL_IsActive(pMe->m_pIMainMenu))
+		IMENUCTL_SetActive(pMe->m_pIMainMenu, FALSE);
+
+	IDISPLAY_ClearScreen(pMe->pIDisplay);
+	IDISPLAY_UpdateEx(pMe->pIDisplay, TRUE);
+
+
+	SETAEERECT(&rect, 0, 0, pMe->DeviceInfo.cxScreen, pMe->DeviceInfo.cyScreen);
+    ISTATIC_SetRect(pMe->m_pIStatic, &rect);
+
+	ISTATIC_SetProperties(pMe->m_pIStatic, ST_MIDDLETEXT | ST_CENTERTEXT);
+	ISTATIC_SetText(pMe->m_pIStatic, title, text, AEE_FONT_BOLD, AEE_FONT_NORMAL);
+
+	ISTATIC_SetActive(pMe->m_pIStatic, TRUE);
+	ISTATIC_Redraw(pMe->m_pIStatic);
+}
+
+static void CameraNotify(void* pUser, AEECameraNotify *pn)
+{
+	mycamera * pMe = (mycamera *) pUser;
+
+	switch( pn->nStatus ) {
+		case CAM_STATUS_FRAME:
+		{ 
+			if (pn->nCmd == CAM_CMD_START && pn->nSubCmd == CAM_MODE_PREVIEW)
+			{
+				IBitmap *pFrame  = NULL;
+				AEEBitmapInfo bi= {0};
+
+				ICAMERA_GetFrame(pMe->m_pICamera, &pFrame );
+
+				if(!pFrame) return;
+
+				IBITMAP_GetInfo( pFrame, &bi, sizeof(bi));
+				
+
+				IDISPLAY_BitBlt(pMe->pIDisplay, 0, 0, bi.cx, bi.cy, pFrame, 0,0, AEE_RO_COPY);
+				IDISPLAY_UpdateEx(pMe->pIDisplay, TRUE);
+				IBITMAP_Release(pFrame);
+				break;
+			}     
+		}
+
+
+		case CAM_STATUS_DONE:
+//lab 3
+			if (pn->nCmd == CAM_CMD_START && pn->nSubCmd == CAM_MODE_SNAPSHOT)
+			{
+				DisplayText(pMe, (AECHAR*)L"Message", (AECHAR*)L"Picture is Saved!");	
+				ISHELL_SetTimer(pMe->pIShell, 1000, Preview, (void*)pMe);
+				return;
+			}
+
+			if (pn->nCmd == CAM_CMD_START && pn->nSubCmd == CAM_MODE_PREVIEW)
+			{
+				AEESize size;
+				AEEMediaData md  = {0};
+				char filename[32];
+				JulianType date;
+
+				size.cx = MC_CAPTURE_SIZE_X;
+				size.cy = MC_CAPTURE_SIZE_Y;
+
+				GETJULIANDATE(GETTIMESECONDS(), &date);
+				SPRINTF(filename, "mc%d%d%d%d%d%d.jpg", date.wYear, date.wMonth, date.wDay, date.wHour, date.wMinute, date.wSecond);
+
+				md.clsData = MMD_FILE_NAME;
+				md.pData = filename;
+				md.dwSize = 0;
+
+				ICAMERA_SetMediaData( pMe->m_pICamera, &md, "image/jpeg" );
+
+				ICAMERA_SetVideoEncode(pMe->m_pICamera, AEECLSID_JPEG, 0);
+				ICAMERA_SetSize( pMe->m_pICamera, &size);
+				ICAMERA_RecordSnapshot( pMe->m_pICamera );	
+			}
+//end of lab 3
+			break;
+
+		default:
+			break;
+	}
+}
+
+static void StartCamera(mycamera* pMe)
+{
+
+
+	if (NULL == pMe->m_pICamera)
+	{
+		if (SUCCESS != ISHELL_CreateInstance( pMe->pIShell, AEECLSID_CAMERA, (void**)&pMe->m_pICamera))
+		{
+			DisplayText(pMe, (AECHAR *)L"Error Message", (AECHAR *)L"Cannot create ICamera interface.");
+			return;
+		}
+	}
+	
+	ICAMERA_RegisterNotify( pMe->m_pICamera, CameraNotify, (void *)pMe);
+	ICAMERA_SetParm( pMe->m_pICamera, CAM_PARM_FLASH, CAM_FLASH_AUTO, 0);
+}
+
+static void Preview(void * pUser)
+{
+	mycamera * pMe = (mycamera*) pUser;
+	AEESize size;
+
+	size.cx = pMe->DeviceInfo.cxScreen;
+	size.cy = pMe->DeviceInfo.cyScreen;
+
+	if (pMe->m_pIStatic)
+	{
+		ISTATIC_Release(pMe->m_pIStatic);
+		pMe->m_pIStatic = NULL;
+	}
+
+	IDISPLAY_ClearScreen(pMe->pIDisplay);
+	IDISPLAY_UpdateEx(pMe->pIDisplay, TRUE);
+	ICAMERA_SetDisplaySize( pMe->m_pICamera, &size);
+	ICAMERA_Preview(pMe->m_pICamera);
+}

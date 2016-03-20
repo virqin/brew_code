@@ -1,0 +1,6 @@
+#ifndef MYITAPI_BID
+#define MYITAPI_BID
+
+#define AEECLSID_MYITAPI        0x9000000E
+
+#endif //MYITAPI_BID

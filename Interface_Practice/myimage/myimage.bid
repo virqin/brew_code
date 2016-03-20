@@ -1,0 +1,6 @@
+#ifndef MYIMAGE_BID
+#define MYIMAGE_BID
+
+#define AEECLSID_MYIMAGE        0x90000006
+
+#endif //MYIMAGE_BID

@@ -1,0 +1,6 @@
+#ifndef LFILE_USAE_BID
+#define LFILE_USAE_BID
+
+#define AEECLSID_LFILE_USAE        0x0100900F
+
+#endif //LFILE_USAE_BID

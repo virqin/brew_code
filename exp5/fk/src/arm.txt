@@ -1,0 +1,56 @@
+Warning: C2067I: option -zas will not be supported in future releases of the compiler
+C:\PROGRA~1\BREWSD~1.1\src\AEEAppGen.c: 1 warning, 0 errors, 0 serious errors
+Warning: C2067I: option -zas will not be supported in future releases of the compiler
+C:\PROGRA~1\BREWSD~1.1\src\AEEModGen.c: 1 warning, 0 errors, 0 serious errors
+Warning: C2067I: option -zas will not be supported in future releases of the compiler
+"FirstWindow.h", line 15: Warning: C2997W: 'FirstWindow::~FirstWindow()' inherits implicit virtual from 'STATE::~STATE()'
+"FirstWindow.h", line 32: Warning: C2997W: 'FirstWindow::Init()' inherits implicit virtual from 'STATE::Init()'
+"FirstWindow.h", line 33: Warning: C2997W: 'FirstWindow::Proc()' inherits implicit virtual from 'STATE::Proc()'
+"FirstWindow.h", line 34: Warning: C2997W: 'FirstWindow::Draw()' inherits implicit virtual from 'STATE::Draw()'
+"FirstWindow.h", line 35: Warning: C2997W: 'FirstWindow::KeyProc(int, int)' inherits implicit virtual from 'STATE::KeyProc(int, int)'
+"FirstWindow.h", line 36: Warning: C2997W: 'FirstWindow::HandleEvent(unsigned short, unsigned short, unsigned long)' inherits implicit virtual from 'STATE::HandleEvent(unsigned short, unsigned short, unsigned long)'
+"FirstWindow.cpp", line 256: Warning: C2870W: variable 'dwParam' declared but not used
+"FirstWindow.cpp", line 256: Warning: C2870W: variable 'wParam' declared but not used
+"FirstWindow.cpp", line 257: Warning: C2871W: static 'EG_HandleEvent(_IApplet*, unsigned short, unsigned short, unsigned long)' declared but not used
+FirstWindow.cpp: 10 warnings, 0 errors, 0 serious errors
+Warning: C2067I: option -zas will not be supported in future releases of the compiler
+"FirstWindow.h", line 15: Warning: C2997W: 'FirstWindow::~FirstWindow()' inherits implicit virtual from 'STATE::~STATE()'
+"FirstWindow.h", line 32: Warning: C2997W: 'FirstWindow::Init()' inherits implicit virtual from 'STATE::Init()'
+"FirstWindow.h", line 33: Warning: C2997W: 'FirstWindow::Proc()' inherits implicit virtual from 'STATE::Proc()'
+"FirstWindow.h", line 34: Warning: C2997W: 'FirstWindow::Draw()' inherits implicit virtual from 'STATE::Draw()'
+"FirstWindow.h", line 35: Warning: C2997W: 'FirstWindow::KeyProc(int, int)' inherits implicit virtual from 'STATE::KeyProc(int, int)'
+"FirstWindow.h", line 36: Warning: C2997W: 'FirstWindow::HandleEvent(unsigned short, unsigned short, unsigned long)' inherits implicit virtual from 'STATE::HandleEvent(unsigned short, unsigned short, unsigned long)'
+"fk.cpp", line 73: Warning: C2870W: variable 'pA' declared but not used
+"fk.cpp", line 77: Warning: C2870W: variable 'pGame' declared but not used
+fk.cpp: 9 warnings, 0 errors, 0 serious errors
+Warning: C2067I: option -zas will not be supported in future releases of the compiler
+"FirstWindow.h", line 15: Warning: C2997W: 'FirstWindow::~FirstWindow()' inherits implicit virtual from 'STATE::~STATE()'
+"FirstWindow.h", line 32: Warning: C2997W: 'FirstWindow::Init()' inherits implicit virtual from 'STATE::Init()'
+"FirstWindow.h", line 33: Warning: C2997W: 'FirstWindow::Proc()' inherits implicit virtual from 'STATE::Proc()'
+"FirstWindow.h", line 34: Warning: C2997W: 'FirstWindow::Draw()' inherits implicit virtual from 'STATE::Draw()'
+"FirstWindow.h", line 35: Warning: C2997W: 'FirstWindow::KeyProc(int, int)' inherits implicit virtual from 'STATE::KeyProc(int, int)'
+"FirstWindow.h", line 36: Warning: C2997W: 'FirstWindow::HandleEvent(unsigned short, unsigned short, unsigned long)' inherits implicit virtual from 'STATE::HandleEvent(unsigned short, unsigned short, unsigned long)'
+"GAME.cpp", line 236: Warning: C2871W: static 'EG_HandleEvent(_IApplet*, unsigned short, unsigned short, unsigned long)' declared but not used
+GAME.cpp: 8 warnings, 0 errors, 0 serious errors
+Warning: C2067I: option -zas will not be supported in future releases of the compiler
+"FirstWindow.h", line 15: Warning: C2997W: 'FirstWindow::~FirstWindow()' inherits implicit virtual from 'STATE::~STATE()'
+"FirstWindow.h", line 32: Warning: C2997W: 'FirstWindow::Init()' inherits implicit virtual from 'STATE::Init()'
+"FirstWindow.h", line 33: Warning: C2997W: 'FirstWindow::Proc()' inherits implicit virtual from 'STATE::Proc()'
+"FirstWindow.h", line 34: Warning: C2997W: 'FirstWindow::Draw()' inherits implicit virtual from 'STATE::Draw()'
+"FirstWindow.h", line 35: Warning: C2997W: 'FirstWindow::KeyProc(int, int)' inherits implicit virtual from 'STATE::KeyProc(int, int)'
+"FirstWindow.h", line 36: Warning: C2997W: 'FirstWindow::HandleEvent(unsigned short, unsigned short, unsigned long)' inherits implicit virtual from 'STATE::HandleEvent(unsigned short, unsigned short, unsigned long)'
+"helpfunc.cpp", line 133: Warning: C2871W: static 'EG_HandleEvent(_IApplet*, unsigned short, unsigned short, unsigned long)' declared but not used
+helpfunc.cpp: 8 warnings, 0 errors, 0 serious errors
+Warning: C2067I: option -zas will not be supported in future releases of the compiler
+"FirstWindow.h", line 15: Warning: C2997W: 'FirstWindow::~FirstWindow()' inherits implicit virtual from 'STATE::~STATE()'
+"FirstWindow.h", line 32: Warning: C2997W: 'FirstWindow::Init()' inherits implicit virtual from 'STATE::Init()'
+"FirstWindow.h", line 33: Warning: C2997W: 'FirstWindow::Proc()' inherits implicit virtual from 'STATE::Proc()'
+"FirstWindow.h", line 34: Warning: C2997W: 'FirstWindow::Draw()' inherits implicit virtual from 'STATE::Draw()'
+"FirstWindow.h", line 35: Warning: C2997W: 'FirstWindow::KeyProc(int, int)' inherits implicit virtual from 'STATE::KeyProc(int, int)'
+"FirstWindow.h", line 36: Warning: C2997W: 'FirstWindow::HandleEvent(unsigned short, unsigned short, unsigned long)' inherits implicit virtual from 'STATE::HandleEvent(unsigned short, unsigned short, unsigned long)'
+"STATE.cpp", line 31: Warning: C2871W: static 'EG_HandleEvent(_IApplet*, unsigned short, unsigned short, unsigned long)' declared but not used
+STATE.cpp: 8 warnings, 0 errors, 0 serious errors
+Warning: L6305W: Image does not have an entry point. (Not specified or not set due to multiple choices.)
+Finished: 0 information, 1 warning and 0 error messages.
+Warning: Q0115W: Deprecated command syntax will not be supported in future versions. Use -output to specify the output file.
+Finished: 0 information, 1 warning and 0 error messages.

@@ -1,0 +1,885 @@
+/*===========================================================================
+
+FILE: myringer.c
+===========================================================================*/
+
+
+/*===============================================================================
+INCLUDES AND VARIABLE DEFINITIONS
+=============================================================================== */
+#include "AEEModGen.h"          // Module interface definitions
+#include "AEEAppGen.h"          // Applet interface definitions
+#include "AEEShell.h"           // Shell interface definitions
+#include "AEEFile.h"			// File interface definitions
+#include "AEEStdLib.h"
+#include "AEEMenu.h"
+#include "AEERinger.h"
+
+#include "myringer.bid"
+
+const char * FormatList[] = { "UNKNOWN\n", "MIDI\n", "MP3\n", "LAST\n" };
+
+/*-------------------------------------------------------------------
+Applet structure. All variables in here are reference via "pMe->"
+-------------------------------------------------------------------*/
+// create an applet structure that's passed around. All variables in
+// here will be able to be referenced as static.
+typedef struct _myringer {
+	AEEApplet      a ;	       // First element of this structure must be AEEApplet
+    AEEDeviceInfo  DeviceInfo; // always have access to the hardware device information
+    IDisplay      *pIDisplay;  // give a standard way to access the Display interface
+    IShell        *pIShell;    // give a standard way to access the Shell interface
+
+	IFileMgr	  *m_pIFileMgr;	// File Manager
+	IFile		  *m_pIFile;		// File Object
+	IMenuCtl	  *m_pIMainMenu;	// Main Menu
+	IMenuCtl	  *m_pISoftMenu;	// Soft-Key Menu
+	IRingerMgr    *m_pIRingerMgr;
+	IMemAStream   *m_pMemStream;
+	IStatic		  *m_pIStatic;
+	AECHAR		  *m_pszText;
+	byte		  *m_pBuff;
+	AECHAR		   m_szTitle[20];
+
+} myringer;
+
+
+#define RT_CREATE			100
+#define RT_ENUMCATEGORY		101
+#define RT_ENUMRINGER		102
+#define RT_RINGERFORMAT		103
+#define RT_PLAY				104
+#define RT_SETRINGER		105
+#define RT_REMOVE			106
+
+#define RINGER_NAME_PREFIX	"rt"
+#define SetRingerName(name) 	RINGER_NAME_PREFIX#name
+
+#define SOFTMENU_BACK		400
+
+#define TEXT_BUFFER_SIZE (1024 * sizeof(AECHAR))
+#define BOTTOM_TEXT_HEIGHT			15
+
+
+/*-------------------------------------------------------------------
+Function Prototypes
+-------------------------------------------------------------------*/
+static  boolean myringer_HandleEvent(myringer* pMe, 
+                                                   AEEEvent eCode, uint16 wParam, 
+                                                   uint32 dwParam);
+boolean myringer_InitAppData(myringer* pMe);
+void    myringer_FreeAppData(myringer* pMe);
+
+static void DisplayText(myringer* pMe);
+static void BuildMainMenu(myringer* pMe);
+static boolean CreateRinger(myringer* pMe, const char * ringername, 
+						const char * inputfile, AEESoundPlayerFile format);
+static void CleanUp(myringer* pMe);
+
+static AEERingerID GetFirstRingerID(myringer* pMe);
+
+
+/*===============================================================================
+FUNCTION DEFINITIONS
+=============================================================================== */
+
+/*===========================================================================
+FUNCTION: AEEClsCreateInstance
+
+DESCRIPTION
+	This function is invoked while the app is being loaded. All Modules must provide this 
+	function. Ensure to retain the same name and parameters for this function.
+	In here, the module must verify the ClassID and then invoke the AEEApplet_New() function
+	that has been provided in AEEAppGen.c. 
+
+   After invoking AEEApplet_New(), this function can do app specific initialization. In this
+   example, a generic structure is provided so that app developers need not change app specific
+   initialization section every time except for a call to IDisplay_InitAppData(). 
+   This is done as follows: InitAppData() is called to initialize AppletData 
+   instance. It is app developers responsibility to fill-in app data initialization 
+   code of InitAppData(). App developer is also responsible to release memory 
+   allocated for data contained in AppletData -- this can be done in 
+   IDisplay_FreeAppData().
+
+PROTOTYPE:
+   int AEEClsCreateInstance(AEECLSID ClsId,IShell * pIShell,IModule * po,void ** ppObj)
+
+PARAMETERS:
+	clsID: [in]: Specifies the ClassID of the applet which is being loaded
+
+	pIShell: [in]: Contains pointer to the IShell object. 
+
+	pIModule: pin]: Contains pointer to the IModule object to the current module to which
+	this app belongs
+
+	ppObj: [out]: On return, *ppObj must point to a valid IApplet structure. Allocation
+	of memory for this structure and initializing the base data members is done by AEEApplet_New().
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  AEE_SUCCESS: If the app needs to be loaded and if AEEApplet_New() invocation was
+     successful
+  EFAILED: If the app does not need to be loaded or if errors occurred in 
+     AEEApplet_New(). If this function returns FALSE, the app will not be loaded.
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+int AEEClsCreateInstance(AEECLSID ClsId, IShell *pIShell, IModule *po, void **ppObj)
+{
+	*ppObj = NULL;
+
+	if( ClsId == AEECLSID_MYRINGER )
+	{
+		// Create the applet and make room for the applet structure
+		if( AEEApplet_New(sizeof(myringer),
+                          ClsId,
+                          pIShell,
+                          po,
+                          (IApplet**)ppObj,
+                          (AEEHANDLER)myringer_HandleEvent,
+                          (PFNFREEAPPDATA)myringer_FreeAppData) ) // the FreeAppData function is called after sending EVT_APP_STOP to the HandleEvent function
+                          
+		{
+			//Initialize applet data, this is called before sending EVT_APP_START
+            // to the HandleEvent function
+			if(myringer_InitAppData((myringer*)*ppObj))
+			{
+				//Data initialized successfully
+				return(AEE_SUCCESS);
+			}
+			else
+			{
+				//Release the applet. This will free the memory allocated for the applet when
+				// AEEApplet_New was called.
+				IAPPLET_Release((IApplet*)*ppObj);
+				return EFAILED;
+			}
+
+        } // end AEEApplet_New
+
+    }
+
+	return(EFAILED);
+}
+
+
+/*===========================================================================
+FUNCTION SampleAppWizard_HandleEvent
+
+DESCRIPTION
+	This is the EventHandler for this app. All events to this app are handled in this
+	function. All APPs must supply an Event Handler.
+
+PROTOTYPE:
+	boolean SampleAppWizard_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+
+PARAMETERS:
+	pi: Pointer to the AEEApplet structure. This structure contains information specific
+	to this applet. It was initialized during the AEEClsCreateInstance() function.
+
+	ecode: Specifies the Event sent to this applet
+
+   wParam, dwParam: Event specific data.
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  TRUE: If the app has processed the event
+  FALSE: If the app did not process the event
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+static boolean myringer_HandleEvent(myringer* pMe, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+{  
+
+	char szBuf[100];
+
+    switch (eCode) 
+	{
+        // App is told it is starting up
+        case EVT_APP_START:                        
+		    BuildMainMenu(pMe);
+            return(TRUE);
+
+
+        // App is told it is exiting
+        case EVT_APP_STOP:
+            // Add your code here...
+
+      		return(TRUE);
+
+
+        // App is being suspended 
+        case EVT_APP_SUSPEND:
+		    // Add your code here...
+
+      		return(TRUE);
+
+
+        // App is being resumed
+        case EVT_APP_RESUME:
+		    // Add your code here...
+
+      		return(TRUE);
+
+
+        // An SMS message has arrived for this app. Message is in the dwParam above as (char *)
+        // sender simply uses this format "//BREW:ClassId:Message", example //BREW:0x00000001:Hello World
+        case EVT_APP_MESSAGE:
+		    // Add your code here...
+
+      		return(TRUE);
+
+        // A key was pressed. Look at the wParam above to see which key was pressed. The key
+        // codes are in AEEVCodes.h. Example "AVK_1" means that the "1" key was pressed.
+        case EVT_KEY:
+		    //If Main Menu is Active let it handle the event
+			if(pMe->m_pIMainMenu && IMENUCTL_IsActive(pMe->m_pIMainMenu))
+			{
+				CleanUp(pMe);
+				return IMENUCTL_HandleEvent(pMe->m_pIMainMenu, EVT_KEY, wParam, 0);
+			}
+
+			//If Soft Menu is Active let it handle the event
+			if(pMe->m_pISoftMenu && IMENUCTL_IsActive(pMe->m_pISoftMenu))
+			{
+				switch(wParam)
+				{
+				case AVK_CLR:
+					// Go back to the mainmenu
+					ISTATIC_Release (pMe->m_pIStatic);
+					pMe->m_pIStatic = NULL;
+
+					IMENUCTL_SetActive(pMe->m_pISoftMenu, FALSE);
+					IMENUCTL_SetActive(pMe->m_pIMainMenu, TRUE);
+					IDISPLAY_ClearScreen(pMe->pIDisplay);
+					IMENUCTL_Redraw(pMe->m_pIMainMenu);
+					return TRUE;
+
+				default:
+					return IMENUCTL_HandleEvent(pMe->m_pISoftMenu, EVT_KEY, wParam, 0);
+				}
+			}
+
+      		return(TRUE);
+		case EVT_COMMAND:
+			switch (wParam)
+			{
+			case RT_CREATE:
+				STRTOWSTR("Create", pMe->m_szTitle, sizeof(pMe->m_szTitle));
+
+				if (TRUE != CreateRinger(pMe, SetRingerName(0), "ringer0.mid", AEE_SOUNDPLAYER_FILE_MIDI))
+				{
+					DBGPRINTF("Create ring0 failed!");
+					STRCPY(szBuf, "Create ring0 failed!\n");
+				}
+				else
+				{
+					DBGPRINTF("Create ring0 successfully!");
+					STRCPY(szBuf, "Create ring0 successfully!\n");
+				}
+				
+				STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				DisplayText(pMe);
+
+				return TRUE;
+				
+			case RT_ENUMCATEGORY:
+				{
+					AEERingerCat catinfo;
+					AECHAR szFormat[30], szText[70];
+
+					STRTOWSTR("EnumCategory", pMe->m_szTitle, sizeof(pMe->m_szTitle));
+					
+					//lab 2
+					ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+					//end of lab 2
+					
+					if(pMe->m_pIRingerMgr == NULL)
+					{
+						DBGPRINTF("Create RingerMgr failed!");
+						STRCPY(szBuf, "Create RingerMgr failed!");
+						STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+						IDISPLAY_ClearScreen(pMe->pIDisplay);
+						DisplayText(pMe);
+						return TRUE;
+					}
+
+					//lab 2
+					if(SUCCESS != IRINGERMGR_EnumCategoryInit(pMe->m_pIRingerMgr))
+					{
+						DBGPRINTF("EnumCTG failed!");
+						CleanUp(pMe);
+						STRCPY(szBuf, "EnumCateInit failed!");
+						STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+						IDISPLAY_ClearScreen(pMe->pIDisplay);
+						DisplayText(pMe);
+
+						return TRUE;
+					}
+					//end of lab 2
+				 
+					DBGPRINTF("EnumCTG Begin:");
+					MEMSET(pMe->m_pszText, 0, TEXT_BUFFER_SIZE);
+					
+					//lab 2
+					while(IRINGERMGR_EnumNextCategory(pMe->m_pIRingerMgr,&catinfo))
+					{
+						DBGPRINTF("CATEGORY ID: %u", catinfo.id);
+						DBGPRINTF("RINGER ID: %u", catinfo.idRinger);
+						DBGPRINTF("NAME: %S", catinfo.szName);
+						STRTOWSTR("CATEGORY NAME: %s \n", szFormat, sizeof(szFormat));
+						WSPRINTF(szText, sizeof(szText), szFormat, catinfo.szName);
+						WSTRCAT(pMe->m_pszText, szText);
+					}
+					//end of lab 2
+				}
+				
+				CleanUp(pMe);
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				DisplayText(pMe);
+				
+				return TRUE;
+				
+			case RT_ENUMRINGER:
+				{
+				  
+					AEERingerInfo ringerinfo;
+					AECHAR szFormat[30], szText[70];
+
+					STRTOWSTR("EnumRinger", pMe->m_szTitle, sizeof(pMe->m_szTitle));
+					
+					//lab 3
+					ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+					//end of lab 3
+					
+					if(pMe->m_pIRingerMgr == NULL)
+					{
+						DBGPRINTF("Create RingerMgr failed!");
+						STRCPY(szBuf, "Create RingerMgr failed!");
+						STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+						IDISPLAY_ClearScreen(pMe->pIDisplay);
+						DisplayText(pMe);
+						return TRUE;
+					}
+					
+					//lab 3
+					if (SUCCESS != IRINGERMGR_EnumRingerInit(pMe->m_pIRingerMgr))
+					{
+						DBGPRINTF("EnumRing failed!");
+						CleanUp(pMe);
+						STRCPY(szBuf, "EnumRinger failed!");
+						STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+						IDISPLAY_ClearScreen(pMe->pIDisplay);
+						DisplayText(pMe);
+						return TRUE;
+					}
+					//end of lab 3
+					
+					MEMSET(pMe->m_pszText, 0, TEXT_BUFFER_SIZE);
+					
+					//lab 3
+					while(IRINGERMGR_EnumNextRinger(pMe->m_pIRingerMgr, &ringerinfo))
+					{
+						DBGPRINTF("RINGER ID: %u", ringerinfo.id);
+						DBGPRINTF("FORMAT: %u", ringerinfo.format);
+						DBGPRINTF("NAME: %s", ringerinfo.szName);
+						if (ringerinfo.szFile) // can be NULL if read only
+						{
+							DBGPRINTF("FILE: %s", ringerinfo.szFile);
+						}
+						STRTOWSTR("NAME: %s \n", szFormat, sizeof(szFormat));
+						WSPRINTF(szText, sizeof(szText), szFormat, ringerinfo.szName);
+						WSTRCAT(pMe->m_pszText, szText);
+					}
+					//end of lab 3
+				}
+				CleanUp(pMe);
+
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				DisplayText(pMe);
+				return TRUE;
+
+			case RT_RINGERFORMAT:
+				{
+					AEESoundPlayerFile pwFormats[4];
+					int NumberOfFormats = -1, i;
+					
+					STRTOWSTR("RingerFormat", pMe->m_szTitle, sizeof(pMe->m_szTitle));
+					//lab 4
+					ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+					//end of lab 4
+					if(pMe->m_pIRingerMgr == NULL)
+					{
+						DBGPRINTF("Create RingerMgr failed!");
+						STRCPY(szBuf, "Create RingerMgr failed!");
+						STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+						IDISPLAY_ClearScreen(pMe->pIDisplay);
+						DisplayText(pMe);
+						return TRUE;
+					}
+					
+					//lab 4
+					NumberOfFormats = IRINGERMGR_GetNumberFormats(pMe->m_pIRingerMgr);
+					IRINGERMGR_GetFormats(pMe->m_pIRingerMgr, pwFormats, NumberOfFormats);
+					//end of lab 4
+					
+					STRCPY(szBuf, "Support Format: \n");
+
+					for (i = 0; i<NumberOfFormats; i++)
+					{
+						DBGPRINTF("Support Format: %d", (int)pwFormats[i]);
+						STRCAT(szBuf, FormatList[(int)pwFormats[i]]);						
+					}
+
+  					CleanUp(pMe);
+				}
+
+				STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				DisplayText(pMe);
+				return TRUE;
+				
+			case RT_PLAY:
+				{
+					AEERingerID ringId = GetFirstRingerID(pMe);
+					STRTOWSTR("Play", pMe->m_szTitle, sizeof(pMe->m_szTitle));
+
+					if (ringId != AEE_RINGER_ID_NONE)
+					{
+						//lab 5
+						ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+						//end of lab 5
+						
+						if(pMe->m_pIRingerMgr == NULL)
+						{
+							DBGPRINTF("Create RingerMgr failed!");
+							STRCPY(szBuf, "Create RingerMgr failed!");
+							STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+							IDISPLAY_ClearScreen(pMe->pIDisplay);
+							DisplayText(pMe);
+							return TRUE;
+						}
+						
+						//lab 5
+						if (SUCCESS != IRINGERMGR_Play(pMe->m_pIRingerMgr, ringId, 2))
+						{
+							DBGPRINTF("PLAY failed!");
+							STRCPY(szBuf, "Play failed!");
+						} 
+						else 
+						{
+							DBGPRINTF("PLAY success!");
+							STRCPY(szBuf, "Play success!");
+						}
+						//end of lab 5
+					} 
+					else 
+					{
+						STRCPY(szBuf, "No Ringer Avail.");
+					}
+					
+				}
+				STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				DisplayText(pMe);
+
+				return TRUE;
+
+			case RT_SETRINGER:
+				{
+					AEERingerID ringId = GetFirstRingerID(pMe);
+					STRTOWSTR("SetRinger", pMe->m_szTitle, sizeof(pMe->m_szTitle));
+
+					if (ringId != AEE_RINGER_ID_NONE)
+					{
+						//lab 6
+						ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+						//end of lab 6
+						
+						if(pMe->m_pIRingerMgr == NULL)
+						{
+							DBGPRINTF("Create RingerMgr failed!");
+							STRCPY(szBuf, "Create RingerMgr failed!");
+							STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+							IDISPLAY_ClearScreen(pMe->pIDisplay);
+							DisplayText(pMe);
+
+							return TRUE;
+						}
+						
+						//lab 6
+						if (SUCCESS != IRINGERMGR_SetRinger(pMe->m_pIRingerMgr, 0, ringId))
+						{
+							DBGPRINTF("SetRinger failed!");
+							STRCPY(szBuf, "SetRinger failed!");
+						} 
+						else 
+						{
+							DBGPRINTF("SetRinger success!");
+							STRCPY(szBuf, "SetRinger success!");
+						}
+						//end of lab 6
+					}
+					else 
+					{
+						STRCPY(szBuf, "No Ringer Avail.");
+					}
+				}
+				CleanUp(pMe);
+
+				STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				DisplayText(pMe);
+
+				return TRUE;
+
+			case RT_REMOVE:
+				{
+					AEERingerID ringId = GetFirstRingerID(pMe);
+
+					STRTOWSTR("Remove", pMe->m_szTitle, sizeof(pMe->m_szTitle));
+					if (ringId != AEE_RINGER_ID_NONE)
+					{
+						//lab 7
+						ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+						//end of lab 7
+						
+						if(pMe->m_pIRingerMgr == NULL)
+						{
+							DBGPRINTF("Create RingerMgr failed!");
+							STRCPY(szBuf, "Create RingerMgr failed!");
+							STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+							IDISPLAY_ClearScreen(pMe->pIDisplay);
+							DisplayText(pMe);
+
+							return TRUE;
+						}
+						
+						//lab 7
+						if (SUCCESS != IRINGERMGR_Remove(pMe->m_pIRingerMgr, ringId))
+						{
+							DBGPRINTF("Remove failed!");
+							STRCPY(szBuf, "Remove failed!");
+						} 
+						else 
+						{
+							DBGPRINTF("Remove success!");
+							STRCPY(szBuf, "Remove success!");
+						}
+						//end of lab 7
+					}
+					else 
+					{
+						STRCPY(szBuf, "No Ringer Avail.");
+					}
+				}
+				
+				CleanUp(pMe);
+				STRTOWSTR(szBuf, pMe->m_pszText, TEXT_BUFFER_SIZE);
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				DisplayText(pMe);
+
+				return TRUE;
+
+			case SOFTMENU_BACK:
+
+				// Go back to the mainmenu
+				ISTATIC_Release (pMe->m_pIStatic);
+				pMe->m_pIStatic = NULL;
+
+				IMENUCTL_SetActive(pMe->m_pISoftMenu, FALSE);
+				IMENUCTL_SetActive(pMe->m_pIMainMenu, TRUE);
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				IMENUCTL_Redraw(pMe->m_pIMainMenu);
+				return TRUE;
+			
+			default:
+				return FALSE;
+			}
+
+
+
+        // If nothing fits up to this point then we'll just break out
+        default:
+            break;
+   }
+
+   return FALSE;
+}
+
+
+
+// this function is called when your application is starting up
+boolean myringer_InitAppData(myringer* pMe)
+{
+	AECHAR szBuf[15];
+    // Get the device information for this handset.
+    // Reference all the data by looking at the pMe->DeviceInfo structure
+    // Check the API reference guide for all the handy device info you can get
+    pMe->DeviceInfo.wStructSize = sizeof(pMe->DeviceInfo);
+    ISHELL_GetDeviceInfo(pMe->a.m_pIShell,&pMe->DeviceInfo);
+
+    // The display and shell interfaces are always created by
+    // default, so we'll asign them so that you can access
+    // them via the standard "pMe->" without the "a."
+    pMe->pIDisplay = pMe->a.m_pIDisplay;
+    pMe->pIShell   = pMe->a.m_pIShell;
+
+
+	pMe->m_pIFileMgr = NULL;
+	pMe->m_pIFile = NULL;
+	pMe->m_pIStatic = NULL;
+	pMe->m_pIRingerMgr = NULL;
+	pMe->m_pISoftMenu = NULL;
+	pMe->m_pIMainMenu = NULL;
+	pMe->m_pMemStream = NULL;
+	pMe->m_pBuff = NULL;
+
+	if ((pMe->m_pszText = (AECHAR *) MALLOC(TEXT_BUFFER_SIZE)) == NULL)
+		return FALSE;
+	
+	// Create the Main Menu
+	if (ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void * *) (&(pMe->m_pIMainMenu))) != SUCCESS )
+	{
+		FREE(pMe->m_pszText);
+		return FALSE;
+	}
+	
+	// Create the Soft Menu Menu
+	if (ISHELL_CreateInstance(pMe->pIShell, AEECLSID_SOFTKEYCTL, (void * *) (&(pMe->m_pISoftMenu))) != SUCCESS )
+	{
+		FREE(pMe->m_pszText);
+		IMENUCTL_Release(pMe->m_pIMainMenu);
+		return FALSE;
+	}
+	
+	//Add individual entries to the Menu
+
+    // Add Back to menu
+    STR_TO_WSTR("Back", szBuf, sizeof(szBuf));
+    IMENUCTL_AddItem(pMe->m_pISoftMenu, 0, 0, SOFTMENU_BACK, szBuf, 0);
+	return TRUE;
+}
+
+// this function is called when your application is exiting
+void myringer_FreeAppData(myringer* pMe)
+{
+	CleanUp(pMe);
+
+	if(pMe->m_pISoftMenu != NULL)
+	{
+		IMENUCTL_Release(pMe->m_pISoftMenu);
+		pMe->m_pISoftMenu = NULL;
+	}
+
+	if(pMe->m_pIMainMenu != NULL)
+	{
+		IMENUCTL_Release(pMe->m_pIMainMenu);
+		pMe->m_pIMainMenu = NULL;
+	}
+
+	if (pMe->m_pIStatic != NULL)
+	{
+		ISTATIC_Release (pMe->m_pIStatic);
+		pMe->m_pIStatic = NULL;
+	}
+
+	if (pMe->m_pszText != NULL)
+	{
+		FREE(pMe->m_pszText);
+		pMe->m_pszText = NULL;
+	}
+}
+
+
+static void DisplayText(myringer* pMe)
+{
+	AEERect rect;
+	
+	if (ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&(pMe->m_pIStatic)) != SUCCESS)
+	    return;
+
+	SETAEERECT(&rect, 2, 2, pMe->DeviceInfo.cxScreen - 4, pMe->DeviceInfo.cyScreen - BOTTOM_TEXT_HEIGHT);
+
+	IMENUCTL_SetActive(pMe->m_pIMainMenu,FALSE);
+	IDISPLAY_ClearScreen(pMe->pIDisplay);
+           
+	ISTATIC_SetRect(pMe->m_pIStatic, &rect);
+			
+	if (ISTATIC_SetText(pMe->m_pIStatic, pMe->m_szTitle, pMe->m_pszText, AEE_FONT_BOLD, AEE_FONT_NORMAL) == FALSE)
+	{
+		ISTATIC_Release (pMe->m_pIStatic);
+		pMe->m_pIStatic = NULL;
+		return;
+	}
+
+	ISTATIC_Redraw(pMe->m_pIStatic);
+ 	
+	IMENUCTL_SetActive(pMe->m_pISoftMenu,TRUE);
+	IDISPLAY_Update(pMe->pIDisplay);
+}
+
+static void BuildMainMenu(myringer* pMe)
+{
+
+	AECHAR szBuf[40];
+	AEERect rect;
+
+
+	SETAEERECT(&rect, 0, 0, pMe->DeviceInfo.cxScreen, pMe->DeviceInfo.cyScreen);
+
+	IMENUCTL_SetRect(pMe->m_pIMainMenu, &rect);
+
+	// Set Title
+    STR_TO_WSTR("Ringer Test", szBuf, sizeof(szBuf));
+	IMENUCTL_SetTitle(pMe->m_pIMainMenu, NULL, 0, szBuf);
+
+	//Add individual entries to the Menu
+
+    STR_TO_WSTR("1. Create", szBuf, sizeof(szBuf));
+    IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, RT_CREATE, szBuf, 0);
+	
+	STR_TO_WSTR("2. EnumCategory", szBuf, sizeof(szBuf));
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, RT_ENUMCATEGORY, szBuf, 0);
+
+	STR_TO_WSTR("3. EnumRinger", szBuf, sizeof(szBuf));
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, RT_ENUMRINGER, szBuf, 0);
+
+	STR_TO_WSTR("4. RingerFormat", szBuf, sizeof(szBuf));
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, RT_RINGERFORMAT, szBuf, 0);
+
+	STR_TO_WSTR("5. Play", szBuf, sizeof(szBuf));
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, RT_PLAY, szBuf, 0);
+
+	STR_TO_WSTR("6. SetRinger", szBuf, sizeof(szBuf));
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, RT_SETRINGER, szBuf, 0);
+
+	STR_TO_WSTR("7. Remove", szBuf, sizeof(szBuf));
+	IMENUCTL_AddItem(pMe->m_pIMainMenu, 0, 0, RT_REMOVE, szBuf, 0);
+
+	if(pMe->m_pISoftMenu)
+		IMENUCTL_SetActive(pMe->m_pISoftMenu,FALSE);
+	IMENUCTL_SetActive(pMe->m_pIMainMenu,TRUE);
+}
+
+static void CleanUp(myringer* pMe)
+{
+	if (pMe->m_pIRingerMgr != NULL)
+	{
+		// Deregister Notify so that 
+		IRINGERMGR_RegisterNotify (pMe->m_pIRingerMgr, NULL, NULL);
+		// Stop any songs being played at this time
+		IRINGERMGR_Stop (pMe->m_pIRingerMgr);
+		IRINGERMGR_Release (pMe->m_pIRingerMgr);
+		pMe->m_pIRingerMgr = NULL;
+	}
+
+	if (pMe->m_pIFile != NULL)
+	{
+		IFILE_Release(pMe->m_pIFile);
+		pMe->m_pIFile = NULL;
+	}
+
+	if (pMe->m_pIFileMgr != NULL)
+	{
+		IFILEMGR_Release(pMe->m_pIFileMgr);
+		pMe->m_pIFileMgr = NULL;
+	}
+
+	if (pMe->m_pMemStream != NULL)
+	{
+		IMEMASTREAM_Release(pMe->m_pMemStream);
+		pMe->m_pMemStream = NULL;
+	}
+
+}
+
+static AEERingerID GetFirstRingerID(myringer* pMe)
+{		  
+	AEERingerInfo ringerinfo;
+	AEERingerID ringerId = AEE_RINGER_ID_NONE;
+	
+	ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+	if(pMe->m_pIRingerMgr == NULL)
+	{
+		return ringerId;
+	}
+
+	if (SUCCESS != IRINGERMGR_EnumRingerInit(pMe->m_pIRingerMgr))
+		goto Exit;
+
+	while (IRINGERMGR_EnumNextRinger(pMe->m_pIRingerMgr, &ringerinfo))
+	{
+		char name[MAX_RINGER_NAME+1];
+		
+		WSTRTOSTR(ringerinfo.szName, name, MAX_RINGER_NAME);
+		ringerId = ringerinfo.id;
+		break;
+	}
+
+Exit:
+	CleanUp(pMe);
+
+	return ringerId;
+}
+
+static boolean CreateRinger(myringer* pMe, const char * ringername, const char * inputfile, AEESoundPlayerFile format)
+{
+	FileInfo fi;
+	AECHAR rngName[15] ;
+	boolean bRet = FALSE;
+
+	if ( ringername )
+	{
+		STRTOWSTR(ringername, rngName, sizeof(rngName) );
+	}
+	else
+		return bRet;
+	//lab 1
+	ISHELL_CreateInstance(pMe->pIShell, AEECLSID_RINGERMGR, (void **)&pMe->m_pIRingerMgr); 
+	//end of lab 1
+	
+	if(pMe->m_pIRingerMgr == NULL)
+	{
+		return bRet;
+	}
+
+	ISHELL_CreateInstance(pMe->pIShell, AEECLSID_FILEMGR, (void **)(&pMe->m_pIFileMgr));
+   
+	if (NULL == pMe->m_pIFileMgr)
+		goto Exit;
+
+	if (NULL == (pMe->m_pIFile = IFILEMGR_OpenFile(pMe->m_pIFileMgr, inputfile, _OFM_READ)))
+		goto Exit;
+
+	IFILE_GetInfo(pMe->m_pIFile, &fi);
+	
+	if (NULL == (pMe->m_pBuff = (byte *) MALLOC(fi.dwSize)))
+		goto Exit;
+
+	if (IFILE_Read(pMe->m_pIFile, (void *)pMe->m_pBuff, fi.dwSize) == 0)
+		goto Exit;
+
+	ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MEMASTREAM, (void **)(&pMe->m_pMemStream));
+	if (NULL == pMe->m_pMemStream)
+		goto Exit;
+
+	IMEMASTREAM_Set(pMe->m_pMemStream, pMe->m_pBuff, fi.dwSize, 0, 0);
+	
+	//lab 1
+    if (SUCCESS == IRINGERMGR_Create(pMe->m_pIRingerMgr, (AECHAR*)rngName, format, (IAStream*)pMe->m_pMemStream))
+		bRet = TRUE;
+	//end of lab 1
+
+Exit:
+	CleanUp(pMe);
+
+	return bRet;
+}

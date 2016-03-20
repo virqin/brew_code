@@ -1,0 +1,1 @@
+nmake /f KeyMove.mak clean

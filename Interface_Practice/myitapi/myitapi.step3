@@ -1,0 +1,834 @@
+/*===========================================================================
+
+FILE: myitapi.c
+===========================================================================*/
+
+
+/*===============================================================================
+INCLUDES AND VARIABLE DEFINITIONS
+=============================================================================== */
+#include "AEEModGen.h"          // Module interface definitions
+#include "AEEAppGen.h"          // Applet interface definitions
+#include "AEEShell.h"           // Shell interface definitions
+#include "AEE.h"
+#include "AEESTDLIB.h"
+#include "AEEMenu.h" 
+#include "AEETapi.h"    
+
+#define MY_DEFINE_STEP_1_PHONE_INFO
+#define MY_DEFINE_STEP_2_VOICE_CALL
+#define MY_DEFINE_STEP_3_SMS_TX_RX 
+//#define MY_DEFINE_STEP_4_BREW_SMS 
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+#include "AEESMS.h"
+#endif
+
+#include "myitapi.bid"
+#include "myitapi.brh"
+
+// Size of buffer used to hold text strings
+#define TEXT_BUFFER_SIZE (100 * sizeof(AECHAR))
+
+#ifdef  MY_DEFINE_STEP_3_SMS_TX_RX
+#define DESTINATION_NUMBER "15312345678"
+#endif
+/*-------------------------------------------------------------------
+Applet structure. All variables in here are reference via "pMe->"
+-------------------------------------------------------------------*/
+// create an applet structure that's passed around. All variables in
+// here will be able to be referenced as static.
+typedef struct _myitapi {
+    AEEApplet      a ;         // First element of this structure must be AEEApplet
+    AEEDeviceInfo  DeviceInfo; // always have access to the hardware device information
+    IDisplay      *pIDisplay;  // give a standard way to access the Display interface
+    IShell        *pIShell;    // give a standard way to access the Shell interface
+    int m_cLineNum; // screen line to be written to next
+
+    // add your own variables here...
+    IMenuCtl *   m_pIMenu;
+    IStatic *       m_pIStatic;
+    char             charbuffer[141];
+#ifdef MY_DEFINE_STEP_1_PHONE_INFO
+    ITAPI*  m_pITapi;
+#endif
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+    ISMSMsg *m_pISMSMsg;
+    ISMS       *m_pISMS;
+    AEECallback  m_cb;
+#endif
+
+#ifdef MY_DEFINE_STEP_4_BREW_SMS
+    boolean        m_bBrewSMSStart;
+#endif
+
+} myitapi;
+
+/*-------------------------------------------------------------------
+Function Prototypes
+-------------------------------------------------------------------*/
+static  boolean myitapi_HandleEvent(myitapi* pMe, AEEEvent eCode, uint16 wParam, uint32 dwParam);
+boolean myitapi_InitAppData(myitapi* pMe);
+void    myitapi_FreeAppData(myitapi* pMe);
+
+static void  myitapi_ShowMenu(myitapi* pMe);
+static void  myitapi_DisplayInfo(myitapi* pMe,AECHAR* pInfo);     
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+static void SMSCallBack_Send(void *p);
+#endif
+
+static void WriteLine(myitapi * pMe, char *pszStr);
+static void WriteLineUnicode(myitapi * pMe, AECHAR *pszStr);
+    
+/*===============================================================================
+FUNCTION DEFINITIONS
+=============================================================================== */
+
+/*===========================================================================
+FUNCTION: AEEClsCreateInstance
+
+DESCRIPTION
+    This function is invoked while the app is being loaded. All Modules must provide this 
+    function. Ensure to retain the same name and parameters for this function.
+    In here, the module must verify the ClassID and then invoke the AEEApplet_New() function
+    that has been provided in AEEAppGen.c. 
+
+   After invoking AEEApplet_New(), this function can do app specific initialization. In this
+   example, a generic structure is provided so that app developers need not change app specific
+   initialization section every time except for a call to IDisplay_InitAppData(). 
+   This is done as follows: InitAppData() is called to initialize AppletData 
+   instance. It is app developers responsibility to fill-in app data initialization 
+   code of InitAppData(). App developer is also responsible to release memory 
+   allocated for data contained in AppletData -- this can be done in 
+   IDisplay_FreeAppData().
+
+PROTOTYPE:
+   int AEEClsCreateInstance(AEECLSID ClsId,IShell * pIShell,IModule * po,void ** ppObj)
+
+PARAMETERS:
+    clsID: [in]: Specifies the ClassID of the applet which is being loaded
+
+    pIShell: [in]: Contains pointer to the IShell object. 
+
+    pIModule: pin]: Contains pointer to the IModule object to the current module to which
+    this app belongs
+
+    ppObj: [out]: On return, *ppObj must point to a valid IApplet structure. Allocation
+    of memory for this structure and initializing the base data members is done by AEEApplet_New().
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  AEE_SUCCESS: If the app needs to be loaded and if AEEApplet_New() invocation was
+     successful
+  EFAILED: If the app does not need to be loaded or if errors occurred in 
+     AEEApplet_New(). If this function returns FALSE, the app will not be loaded.
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+int AEEClsCreateInstance(AEECLSID ClsId, IShell *pIShell, IModule *po, void **ppObj)
+{
+    *ppObj = NULL;
+
+    if( ClsId == AEECLSID_MYITAPI )
+    {
+        // Create the applet and make room for the applet structure
+        if( AEEApplet_New(sizeof(myitapi),
+                          ClsId,
+                          pIShell,
+                          po,
+                          (IApplet**)ppObj,
+                          (AEEHANDLER)myitapi_HandleEvent,
+                          (PFNFREEAPPDATA)myitapi_FreeAppData) ) // the FreeAppData function is called after sending EVT_APP_STOP to the HandleEvent function
+                          
+        {
+            //Initialize applet data, this is called before sending EVT_APP_START
+            // to the HandleEvent function
+            if(myitapi_InitAppData((myitapi*)*ppObj))
+            {
+                //Data initialized successfully
+                return(AEE_SUCCESS);
+            }
+            else
+            {
+                //Release the applet. This will free the memory allocated for the applet when
+                // AEEApplet_New was called.
+                IAPPLET_Release((IApplet*)*ppObj);
+                return EFAILED;
+            }
+
+        } // end AEEApplet_New
+
+    }
+
+    return(EFAILED);
+}
+
+
+/*===========================================================================
+FUNCTION SampleAppWizard_HandleEvent
+
+DESCRIPTION
+    This is the EventHandler for this app. All events to this app are handled in this
+    function. All APPs must supply an Event Handler.
+
+PROTOTYPE:
+    boolean SampleAppWizard_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+
+PARAMETERS:
+    pi: Pointer to the AEEApplet structure. This structure contains information specific
+    to this applet. It was initialized during the AEEClsCreateInstance() function.
+
+    ecode: Specifies the Event sent to this applet
+
+   wParam, dwParam: Event specific data.
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  TRUE: If the app has processed the event
+  FALSE: If the app did not process the event
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+static boolean myitapi_HandleEvent(myitapi* pMe, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+{  
+
+    switch (eCode) 
+    {
+        // App is told it is starting up
+        case EVT_APP_START:                        
+            // Add your code here...
+            DBGPRINTF("EVT_APP_START..........");
+#ifdef MY_DEFINE_STEP_4_BREW_SMS
+            if(pMe->m_bBrewSMSStart)
+            {
+                AECHAR szGreeting[141];
+                if( pMe->m_pIMenu )
+                {
+                    IMENUCTL_Release(pMe->m_pIMenu);
+                    pMe->m_pIMenu = NULL;
+                }               
+                STRTOWSTR(pMe->charbuffer, szGreeting, sizeof(pMe->charbuffer));
+                IDISPLAY_ClearScreen(pMe->pIDisplay);
+                myitapi_DisplayInfo(pMe,szGreeting);
+            }
+            else
+            {
+#endif
+                myitapi_ShowMenu(pMe);
+#ifdef MY_DEFINE_STEP_4_BREW_SMS
+            }
+#endif
+            return(TRUE);
+
+
+        // App is told it is exiting
+        case EVT_APP_STOP:
+            // Add your code here...
+
+            return(TRUE);
+
+
+        case EVT_DIALOG_END:
+            // Add your code here...
+            DBGPRINTF("EVT_DIALOG_END.......");
+            return(TRUE);
+
+        // App is being suspended 
+        case EVT_APP_SUSPEND:
+            DBGPRINTF("EVT_APP_SUSPEND.......");
+            // Add your code here...
+#ifdef MY_DEFINE_STEP_2_VOICE_CALL
+            if(pMe->m_pIMenu)
+            {
+                IMENUCTL_SetActive(pMe->m_pIMenu,FALSE);
+            }
+#endif
+
+            return(TRUE);
+
+
+        // App is being resumed
+        case EVT_APP_RESUME:
+            DBGPRINTF("EVT_APP_RESUME.......");
+            // Add your code here...
+#ifdef MY_DEFINE_STEP_2_VOICE_CALL
+            myitapi_ShowMenu(pMe);
+#endif
+            return(TRUE);
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+        case EVT_NOTIFY:
+                {
+                    uint32 uMsgId;
+                    ISMSMsg *pRxMsg=NULL;
+                    AEENotify* pNotify = (AEENotify*) dwParam;
+
+                    // 使用新的SMSNotifier 接口接收短信,此接口BREW 3.1.x 以上版本支持
+                    if (pNotify && (pNotify->cls == AEECLSID_SMSNOTIFIER)) // event sender
+                    {
+                        uint32  MyNMask;
+                        // 普通短信的EVENT MASK
+                        MyNMask = ((AEESMS_TYPE_TEXT << 16) | NMASK_SMS_TYPE);
+                        if ((pNotify->dwMask & MyNMask) == MyNMask) 
+                        {
+                            uMsgId = (uint32 )pNotify->pData;
+                            if(ISMS_ReceiveMsg(pMe->m_pISMS, uMsgId, &pRxMsg)==AEE_SUCCESS)
+                            {
+                                SMSMsgOpt TmpOpt;
+                                DBGPRINTF("ISMS_ReceiveMsg ret ok");
+								
+                                // for print to screen
+                                if(pMe->m_pIMenu)
+                                {
+                                    IMENUCTL_Release(pMe->m_pIMenu);
+                                    pMe->m_pIMenu = NULL;
+                                }
+                                pMe->m_cLineNum = 0;
+                                IDISPLAY_ClearScreen(pMe->pIDisplay);
+
+                                // MSGOPT_FROM_DEVICE_SZ - 发送方号码
+                                if(ISMSMSG_GetOpt(pRxMsg, MSGOPT_FROM_DEVICE_SZ, &TmpOpt)==AEE_SUCCESS)
+                                {
+                                    DBGPRINTF("get MSGOPT_FROM_DEVICE_SZ");
+                                    WriteLine(pMe,  (char *)"From:");
+                                    WriteLine(pMe,  (char *)TmpOpt.pVal);
+                                }
+
+                                // MSGOPT_PAYLOAD_SZ - ASCII的短信内容
+                                if(ISMSMSG_GetOpt(pRxMsg, MSGOPT_PAYLOAD_SZ, &TmpOpt)==AEE_SUCCESS)
+                                {
+                                    DBGPRINTF("get MSGOPT_PAYLOAD_SZ");
+                                    WriteLine(pMe,  (char *)"SMS (ASCII):");
+                                    WriteLine(pMe,  (char *)TmpOpt.pVal);
+                                }
+
+                                // MSGOPT_PAYLOAD_WSZ - UNICODE的短信内容
+                                if(ISMSMSG_GetOpt(pRxMsg, MSGOPT_PAYLOAD_WSZ, &TmpOpt)==AEE_SUCCESS)
+                                {
+                                    DBGPRINTF("get MSGOPT_PAYLOAD_WSZ");
+                                    WriteLine(pMe,  (char *)"SMS (UNICODE):");
+                                    WriteLineUnicode(pMe,  (AECHAR *)TmpOpt.pVal);
+                                }
+
+                                // MSGOPT_TIMESTAMP - 短信时间标签
+                                if(ISMSMSG_GetOpt(pRxMsg, MSGOPT_TIMESTAMP, &TmpOpt)==AEE_SUCCESS)
+                                {
+                                    JulianType *pMyJulian;
+                                    char buf[80];
+                                    DBGPRINTF("get MSGOPT_TIMESTAMP");
+
+                                    pMyJulian = (JulianType *)TmpOpt.pVal;
+                                    SPRINTF(buf, "%d/%d/%d %d:%d:%d, weekday:%d", pMyJulian->wMonth, pMyJulian->wDay, pMyJulian->wYear, 
+                                                                                              pMyJulian->wHour, pMyJulian->wMinute, pMyJulian->wSecond, pMyJulian->wWeekDay);
+                                    WriteLine(pMe,  (char *)"Time Stamp::");
+                                    WriteLine(pMe,  buf);
+                                }
+
+                                // 释放ISMSMsg 资源
+                                ISMSMSG_Release(pRxMsg);
+                                
+                                IDISPLAY_Update(pMe->pIDisplay);
+                                
+                            }
+
+                        }
+                    }
+                }
+            return TRUE;
+#endif
+
+#ifdef MY_DEFINE_STEP_4_BREW_SMS
+        // An SMS message has arrived for this app. Message is in the dwParam above as (char *)
+        // sender simply uses this format "//BREW:ClassId:Message", example //BREW:0x00000001:Hello World
+        case EVT_APP_MESSAGE:
+            // Add your code here...
+            DBGPRINTF("EVT_APP_MESSAGE before ISHELL_StartApplet");
+            STRCPY(pMe->charbuffer, (char*)dwParam);
+            pMe->m_bBrewSMSStart =TRUE;
+            ISHELL_StartApplet(pMe->a.m_pIShell, AEECLSID_MYITAPI);
+            DBGPRINTF("EVT_APP_MESSAGE after ISHELL_StartApplet");
+            return(TRUE);
+#endif
+
+        // A key was pressed. Look at the wParam above to see which key was pressed. The key
+        // codes are in AEEVCodes.h. Example "AVK_1" means that the "1" key was pressed.
+        case EVT_KEY:
+            // Add your code here...            
+            if( pMe->m_pIMenu )
+            {
+                if( IMENUCTL_HandleEvent(pMe->m_pIMenu, EVT_KEY, wParam, dwParam) )
+                    return TRUE;
+                else      return FALSE; 
+            }
+            else if(wParam ==AVK_CLR)
+            {
+                if(pMe->m_pIStatic)
+                {
+                    ISTATIC_Release(pMe->m_pIStatic);
+                    pMe->m_pIStatic = NULL;
+                }
+                myitapi_ShowMenu(pMe);
+            }
+            return TRUE;
+        
+    case EVT_COMMAND:
+        if( pMe->m_pIMenu )
+        {
+            switch(IMENUCTL_GetSel(pMe->m_pIMenu))
+            {
+
+#ifdef MY_DEFINE_STEP_1_PHONE_INFO
+            TAPIStatus tpst;
+            AECHAR szText[141];
+
+            case IDS_MSUSER:
+                if (ITAPI_GetStatus(pMe->m_pITapi, &tpst) != SUCCESS)
+                {
+                    ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_UNKNOWN, szText, sizeof(szText));
+                }
+                else
+                {
+                    AECHAR szData[16];
+                    AECHAR szDigital[16];
+                    AECHAR szRoaming[16];
+                    AECHAR szCallended[16];
+                    AECHAR sz911[16];
+                    AECHAR szRegistered[16];
+                    AECHAR szDormancy[16];
+                
+                    tpst.bData ? 
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_DATA_1, szData, sizeof(szData)):
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_DATA_0, szData, sizeof(szData));
+                        
+                    tpst.bDigital ? 
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_DIGITAL_1, szDigital, sizeof(szDigital)):
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_DIGITAL_0, szDigital, sizeof(szDigital));
+
+                    tpst.bRoaming ? 
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_ROAM_1, szRoaming, sizeof(szRoaming)):
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_ROAM_0, szRoaming, sizeof(szRoaming));
+      
+                    tpst.bCallEnded ? 
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_CALLEND_1, szCallended, sizeof(szCallended)):
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_CALLEND_0, szCallended, sizeof(szCallended));
+      
+                    tpst.bE911CallbackMode ? 
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_911_1, sz911, sizeof(sz911)):
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_911_0, sz911, sizeof(sz911));
+      
+                    tpst.bRegistered ? 
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_REG_1, szRegistered, sizeof(szRegistered)):
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_REG_0, szRegistered, sizeof(szRegistered));
+                    tpst.bDormancy ? 
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_DOR_1, szDormancy, sizeof(szDormancy)):
+                        ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_USER_DOR_0, szDormancy, sizeof(szDormancy));
+                    
+                    WSTRCPY(szText,szData);
+                    WSTRCAT(szText,szDigital);
+                    WSTRCAT(szText,szRoaming);
+                    WSTRCAT(szText,szCallended);
+                    WSTRCAT(szText,sz911);
+                    WSTRCAT(szText,szRegistered);
+                    WSTRCAT(szText,szDormancy);
+                }
+                IMENUCTL_Release(pMe->m_pIMenu);
+                pMe->m_pIMenu = NULL;
+                IDISPLAY_ClearScreen(pMe->pIDisplay);
+                myitapi_DisplayInfo(pMe,szText);
+                return TRUE;
+                
+            case IDS_MSPHONE    :
+                if (ITAPI_GetStatus(pMe->m_pITapi, &tpst) != SUCCESS)
+                {
+                    ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_UNKNOWN, szText, sizeof(szText));
+                }
+                else
+                {
+                    switch (tpst.state)
+                    {
+                        case PS_OFFLINE:
+                            ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_PH_OFFLINE, szText, sizeof(szText));
+                            break;
+                            
+                        case PS_IDLE:
+                            ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_PH_IDLE, szText, sizeof(szText));
+                            break;
+                            
+                        case PS_INCOMING:
+                            ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_PH_INCOMING, szText, sizeof(szText));
+                            break;
+                            
+                        case PS_ORIG:
+                            ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_PH_ORIG, szText, sizeof(szText));
+                            break;
+                            
+                        case PS_CONVERSATION:
+                            ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_PH_CALL, szText, sizeof(szText));
+                            break;
+                    }
+                }               
+                IMENUCTL_Release(pMe->m_pIMenu);
+                pMe->m_pIMenu = NULL;
+                IDISPLAY_ClearScreen(pMe->pIDisplay);
+                myitapi_DisplayInfo(pMe,szText);
+                return TRUE;
+                break;
+#endif // MY_DEFINE_STEP_1_PHONE_INFO
+
+#ifdef MY_DEFINE_STEP_2_VOICE_CALL
+            case IDS_MAKECALL   :
+                ITAPI_MakeVoiceCall(pMe->m_pITapi, "13301330133", AEECLSID_MYITAPI);
+                return TRUE;
+                break;
+#endif
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+            case IDS_SENDSMS:
+                /**************************************************************/
+                /*                           receive SMS register                                                */
+                /**************************************************************/
+                {
+                    // 使用新的AEECLSID_SMSNOTIFIER 的notify机制接收短信
+                    AEECLSID clsNotifier= AEECLSID_SMSNOTIFIER; // Event sender
+                    AEECLSID clsNotify = AEECLSID_MYITAPI; // Event listener
+                    // Set the notify event to be NOTIFY_MASK_EVENT. This event is used
+                    // as an example.
+                    uint32 dwMask = ((AEESMS_TYPE_TEXT << 16) | NMASK_SMS_TYPE); 
+                    int nErr;
+
+                    // Register a notification 
+                    nErr = ISHELL_RegisterNotify (pMe->a.m_pIShell, clsNotify, clsNotifier, dwMask);
+                    DBGPRINTF("ISHELL_RegisterNotify ret %d", nErr);
+                }
+
+                
+                /**************************************************************/
+                /*                           sending SMS                                                           */
+                /**************************************************************/
+                {
+                    int nErr;
+                    WebOpt awo[7]; /* ***IMPORTANT**** grow this if you add more 
+                                     WebOpts here, or shrink it and call AddOpt() multiple times */
+                    int    i = 0;
+                    uint32 nReturn=0;                                 
+                    AECHAR pszBuf[100];
+
+                    nErr =ISHELL_CreateInstance(pMe->a.m_pIShell, AEECLSID_SMSMSG, (void **)&pMe->m_pISMSMsg);
+                    DBGPRINTF("CreateInstance of AEECLSID_SMSMSG ret %d", nErr);
+                    if(nErr != AEE_SUCCESS)
+                    {
+                        break;
+                    }
+
+                    /* NULL terminated string providing destination device number. 
+                        '+' as first character signifies international number.  */
+                    awo[i].nId  = MSGOPT_TO_DEVICE_SZ ;
+                    awo[i].pVal = (void *)DESTINATION_NUMBER;
+                    i++;
+
+                    /* unicode text to be send */
+                    awo[i].nId  = MSGOPT_PAYLOAD_WSZ ;
+                    ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_MO_TEXT_UNICODE, pszBuf, sizeof(pszBuf));
+                    awo[i].pVal = (void *)pszBuf;
+                    i++;
+
+                    /* encoding */
+                    awo[i].nId  = MSGOPT_PAYLOAD_ENCODING;
+                    awo[i].pVal = (void *)AEE_ENC_UNICODE ;
+                    i++;
+
+                    awo[i].nId  = MSGOPT_MOSMS_ENCODING;
+                    awo[i].pVal = (void *)AEESMS_ENC_UNICODE;
+                    i++;
+
+                    /* this is absolutely necessary, do not remove, marks the end of the 
+                       array of WebOpts */
+                    awo[i].nId  = MSGOPT_END;
+                  
+                    /* add 'em */
+                    nErr =ISMSMSG_AddOpt(pMe->m_pISMSMsg, awo);
+                    DBGPRINTF("ISMSMSG_AddOpt ret %d", nErr);
+
+                    CALLBACK_Init(&pMe->m_cb, SMSCallBack_Send, pMe);
+                    ISMS_SendMsg(pMe->m_pISMS, pMe->m_pISMSMsg, &pMe->m_cb, &nReturn);
+
+                    // Higher 16 bits specify error type specified as AEESMS_ERRORTYPE_XXX 
+                    // lower  16 bits specify error specified as AEESMS_ERROR_XXX
+                    DBGPRINTF("ISMS_SendMsg ret 0x%x", nReturn);
+                }
+                break;
+#endif // MY_DEFINE_STEP_3_SMS_TX_RX
+
+#ifdef MY_DEFINE_STEP_4_BREW_SMS
+            case IDS_BREWSMS:
+                ISHELL_LoadResString(pMe->a.m_pIShell, MYITAPI_RES_FILE, IDS_BREWSMS_TEXT, szText, sizeof(szText)); 
+                if(pMe->m_pIMenu)
+                {
+                    IMENUCTL_Release(pMe->m_pIMenu);
+                    pMe->m_pIMenu = NULL;
+                }
+                IDISPLAY_ClearScreen(pMe->pIDisplay);
+                myitapi_DisplayInfo(pMe,szText);
+                return TRUE;
+#endif
+
+            default:
+                break;
+            }
+        }
+
+
+    default:
+        break;
+   }
+
+   return FALSE;
+}
+
+
+// this function is called when your application is starting up
+boolean myitapi_InitAppData(myitapi* pMe)
+{
+    // Get the device information for this handset.
+    // Reference all the data by looking at the pMe->DeviceInfo structure
+    // Check the API reference guide for all the handy device info you can get
+    pMe->DeviceInfo.wStructSize = sizeof(pMe->DeviceInfo);
+    ISHELL_GetDeviceInfo(pMe->a.m_pIShell,&pMe->DeviceInfo);
+
+    // The display and shell interfaces are always created by
+    // default, so we'll asign them so that you can access
+    // them via the standard "pMe->" without the "a."
+    pMe->pIDisplay = pMe->a.m_pIDisplay;
+    pMe->pIShell   = pMe->a.m_pIShell;
+
+    if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void **)&pMe->m_pIMenu) !=SUCCESS)
+    {
+        return FALSE;
+    }
+
+    if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&pMe->m_pIStatic) !=SUCCESS)
+    {
+        return FALSE;
+    }
+
+ #ifdef MY_DEFINE_STEP_1_PHONE_INFO
+    // Insert your code here for initializing or allocating resources...
+    if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_TAPI, (void **)(&pMe->m_pITapi))!=SUCCESS )
+    {
+        return FALSE;
+    }
+#endif
+   
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+    if(ISHELL_CreateInstance(pMe->a.m_pIShell, AEECLSID_SMS, (void **)&pMe->m_pISMS) !=SUCCESS)
+    {
+        return FALSE;
+    }
+#endif
+
+#ifdef MY_DEFINE_STEP_4_BREW_SMS
+    pMe->m_bBrewSMSStart = FALSE;
+#endif
+
+    DBGPRINTF("myitapi_InitAppData");
+
+    // if there have been no failures up to this point then return success
+    return TRUE;
+}
+
+// this function is called when your application is exiting
+void myitapi_FreeAppData(myitapi* pMe)
+{
+    // insert your code here for freeing any resources you have allocated...
+    DBGPRINTF("myitapi_FreeAppData");
+    
+    if( pMe->m_pIMenu )
+    {
+        IMENUCTL_Release(pMe->m_pIMenu);
+        pMe->m_pIMenu = NULL;
+    }
+
+    if(pMe->m_pIStatic)
+    {
+        ISTATIC_Release(pMe->m_pIStatic);
+        pMe->m_pIStatic = NULL;
+    }
+
+#ifdef MY_DEFINE_STEP_1_PHONE_INFO
+    if( pMe->m_pITapi )
+    {
+        ITAPI_Release(pMe->m_pITapi);
+        pMe->m_pITapi = NULL;
+    }
+#endif
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+    if(pMe->m_pISMS)
+    {
+        ISMS_Release(pMe->m_pISMS);
+        pMe->m_pISMS = NULL;
+    }
+#endif    
+}
+
+static void  myitapi_ShowMenu(myitapi* pMe)
+{   
+#ifdef MY_DEFINE_STEP_1_PHONE_INFO
+    CtlAddItem  ai;
+#endif
+
+    if (! pMe->m_pIMenu)
+        ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void **)&pMe->m_pIMenu) ;
+    
+    IMENUCTL_Reset(pMe->m_pIMenu);
+
+#ifdef MY_DEFINE_STEP_1_PHONE_INFO
+    ai.pText = NULL;
+    ai.pImage = NULL;
+    ai.pszResImage = MYITAPI_RES_FILE;
+    ai.pszResText = MYITAPI_RES_FILE;
+    ai.wFont = AEE_FONT_NORMAL;
+    ai.dwData = NULL;
+    
+    ai.wText = IDS_MSUSER;   
+    ai.wImage = IDB_MENU;
+    ai.wItemID = IDS_MSUSER;
+
+    
+    // Add the item to the menu control
+    if(IMENUCTL_AddItemEx(pMe->m_pIMenu, &ai )==FALSE)
+    {
+        IMENUCTL_Release(pMe->m_pIMenu);
+        return;
+    }
+    
+    ai.wText = IDS_MSPHONE;
+    ai.wItemID = IDS_MSPHONE;
+    // Add the item to the menu control
+    IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+#endif
+
+#ifdef MY_DEFINE_STEP_2_VOICE_CALL
+    ai.wText = IDS_MAKECALL;
+    ai.wItemID = IDS_MAKECALL;
+    // Add the item to the menu control
+    IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+#endif
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+    ai.wText = IDS_SENDSMS;
+    ai.wItemID = IDS_SENDSMS;
+    // Add the item to the menu control
+    IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+#endif
+
+#ifdef  MY_DEFINE_STEP_4_BREW_SMS
+    ai.wText = IDS_BREWSMS;
+    ai.wItemID = IDS_BREWSMS;
+    // Add the item to the menu control
+    IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+#endif
+
+    IMENUCTL_SetActive(pMe->m_pIMenu,TRUE);
+}
+static void  myitapi_DisplayInfo(myitapi* pMe,AECHAR* pInfo)
+{
+        AEERect rct;
+    
+    if(!pMe->m_pIStatic)
+        ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&pMe->m_pIStatic);
+    SETAEERECT(&rct, 16, 16, pMe->DeviceInfo.cxScreen-32, pMe->DeviceInfo.cyScreen-32);
+    ISTATIC_SetRect(pMe->m_pIStatic, &rct);
+    ISTATIC_SetText(pMe->m_pIStatic, NULL,pInfo, AEE_FONT_BOLD, AEE_FONT_NORMAL);
+    ISTATIC_Redraw(pMe->m_pIStatic);
+}
+
+#ifdef MY_DEFINE_STEP_3_SMS_TX_RX
+static void SMSCallBack_Send(void *p)
+{
+   myitapi *pMe = (myitapi *)p;
+   DBGPRINTF("SMSCallBack_Send called");
+
+   // 短信发送完毕后，释放ISMSMsg，否则它将保留在其中，对下一条短信产生影响
+   if(pMe->m_pISMSMsg != NULL)
+   {
+       ISMSMSG_Release(pMe->m_pISMSMsg);
+       pMe->m_pISMSMsg = NULL;
+   }
+}
+#endif
+
+
+static void WriteLine(myitapi * pMe, char *pszStr)
+{
+
+   int charHeight = 0;      // Stores the char height in pixels for given font
+   int pnAscent = 0;        // Stores the ascent in number of pixels
+   int pnDescent = 0;       // Stores the descent in number of pixels
+   AECHAR * szBuf;     // a buffer that supports 200 char string
+
+   // Make sure the pointers we'll be using are valid
+   if (pMe==NULL || pMe->pIDisplay == NULL || pszStr == NULL)
+       return;
+
+   if ((szBuf = (AECHAR *) MALLOC(TEXT_BUFFER_SIZE)) == NULL)
+     return;
+
+   // Get the font metrics info
+   charHeight = IDISPLAY_GetFontMetrics (pMe->pIDisplay, AEE_FONT_BOLD, &pnAscent, &pnDescent);
+
+   // Convert to wide string (unicode)
+   STR_TO_WSTR ((char *)pszStr, szBuf, TEXT_BUFFER_SIZE);
+
+   IDISPLAY_DrawText(pMe->pIDisplay,    // Display instance
+                       AEE_FONT_BOLD,       // Use BOLD font
+                       szBuf,        // Text - Normally comes from resource
+                       -1,                  // -1 = Use full string length
+                       0,                   // Ignored - IDF_ALIGN_CENTER
+                       charHeight*pMe->m_cLineNum,                   // Ignored - IDF_ALIGN_MIDDLE
+                       NULL,                // No clipping
+                       0);
+
+  pMe->m_cLineNum ++;
+  FREE(szBuf);
+  return;
+
+} // End of WriteLine 
+
+static void WriteLineUnicode(myitapi * pMe, AECHAR *pszStr)
+{
+
+   int charHeight = 0;      // Stores the char height in pixels for given font
+   int pnAscent = 0;        // Stores the ascent in number of pixels
+   int pnDescent = 0;       // Stores the descent in number of pixels
+
+   // Make sure the pointers we'll be using are valid
+   if (pMe==NULL || pMe->pIDisplay == NULL || pszStr == NULL)
+       return;
+
+   // Get the font metrics info
+   charHeight = IDISPLAY_GetFontMetrics (pMe->pIDisplay, AEE_FONT_BOLD, &pnAscent, &pnDescent);
+
+   IDISPLAY_DrawText(pMe->pIDisplay,    // Display instance
+                       AEE_FONT_BOLD,       // Use BOLD font
+                       pszStr,        // Text - Normally comes from resource
+                       -1,                  // -1 = Use full string length
+                       0,                   // Ignored - IDF_ALIGN_CENTER
+                       charHeight*pMe->m_cLineNum,                   // Ignored - IDF_ALIGN_MIDDLE
+                       NULL,                // No clipping
+                       0);
+
+  pMe->m_cLineNum ++;
+  return;
+
+} // End of WriteLine 
+
+

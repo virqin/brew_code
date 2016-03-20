@@ -1,0 +1,6 @@
+#ifndef MYDISPLAY_BID
+#define MYDISPLAY_BID
+
+#define AEECLSID_MYDISPLAY        0x90000002
+
+#endif //MYDISPLAY_BID

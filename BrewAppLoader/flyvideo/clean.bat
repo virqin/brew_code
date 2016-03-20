@@ -1,0 +1,1 @@
+nmake /f flyvideo.mak clean

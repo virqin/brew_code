@@ -1,0 +1,547 @@
+/*===========================================================================
+
+FILE: myiaddrbook.c
+===========================================================================*/
+
+
+/*===============================================================================
+INCLUDES AND VARIABLE DEFINITIONS
+=============================================================================== */
+#include "AEEModGen.h"          // Module interface definitions
+#include "AEEAppGen.h"          // Applet interface definitions
+#include "AEEShell.h"           // Shell interface definitions
+#include "AEEMenu.h"
+#include "AEEStdLib.h"
+
+//lab 1
+#include "AEEAddrBook.h"
+//end of lab 1
+
+#include "myiaddrbook.bid"
+#include "myiaddrbook_res.h"
+
+/*-------------------------------------------------------------------
+Applet structure. All variables in here are reference via "pMe->"
+-------------------------------------------------------------------*/
+typedef struct _myiaddrbook {
+	AEEApplet      a ;	       // First element of this structure must be AEEApplet
+    AEEDeviceInfo  DeviceInfo; // always have access to the hardware device information
+    IDisplay      *pIDisplay;  // give a standard way to access the Display interface
+    IShell        *pIShell;    // give a standard way to access the Shell interface
+
+    // add your own variables here...
+    //lab 1
+	IStatic *		m_pIStatic;
+	IAddrBook  *	      m_pAddrBook;
+	// end of lab 1
+	IMenuCtl *        m_pIMenu;
+
+
+} myiaddrbook;
+
+/*-------------------------------------------------------------------
+Function Prototypes
+-------------------------------------------------------------------*/
+static  boolean myiaddrbook_HandleEvent(myiaddrbook* pMe, AEEEvent eCode, 
+                                             uint16 wParam, uint32 dwParam);
+boolean myiaddrbook_InitAppData(myiaddrbook* pMe);
+void    myiaddrbook_FreeAppData(myiaddrbook* pMe);
+
+static void  myiaddrbook_ShowMenu(myiaddrbook* pMe);
+static void	 myiaddrbook_DiaplayInfo(myiaddrbook* pMe,AECHAR* pInfo);
+
+/*===============================================================================
+FUNCTION DEFINITIONS
+=============================================================================== */
+
+/*===========================================================================
+FUNCTION: AEEClsCreateInstance
+===========================================================================*/
+int AEEClsCreateInstance(AEECLSID ClsId, IShell *pIShell, IModule *po, void **ppObj)
+{
+	*ppObj = NULL;
+
+	if( ClsId == AEECLSID_MYIADDRBOOK )
+	{
+		// Create the applet and make room for the applet structure
+		if( AEEApplet_New(sizeof(myiaddrbook),
+                          ClsId,
+                          pIShell,
+                          po,
+                          (IApplet**)ppObj,
+                          (AEEHANDLER)myiaddrbook_HandleEvent,
+                          (PFNFREEAPPDATA)myiaddrbook_FreeAppData) ) // the FreeAppData function is called after sending EVT_APP_STOP to the HandleEvent function
+                          
+		{
+			//Initialize applet data, this is called before sending EVT_APP_START
+            // to the HandleEvent function
+			if(myiaddrbook_InitAppData((myiaddrbook*)*ppObj))
+			{
+				//Data initialized successfully
+				return(AEE_SUCCESS);
+			}
+			else
+			{
+				//Release the applet. This will free the memory allocated for the applet when
+				// AEEApplet_New was called.
+				IAPPLET_Release((IApplet*)*ppObj);
+				return EFAILED;
+			}
+
+        } // end AEEApplet_New
+
+    }
+
+	return(EFAILED);
+}
+
+
+/*===========================================================================
+FUNCTION SampleAppWizard_HandleEvent
+===========================================================================*/
+static boolean myiaddrbook_HandleEvent(myiaddrbook* pMe, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+{  
+	AECHAR szText[64];
+    switch (eCode) 
+	{
+        // App is told it is starting up
+        case EVT_APP_START:                        
+		    // Add your code here...
+			myiaddrbook_ShowMenu(pMe);
+            return(TRUE);
+
+
+        // App is told it is exiting
+        case EVT_APP_STOP:
+            // Add your code here...
+
+      		return(TRUE);
+
+
+        // App is being suspended 
+        case EVT_APP_SUSPEND:
+		    // Add your code here...
+
+      		return(TRUE);
+
+
+        // App is being resumed
+        case EVT_APP_RESUME:
+		    // Add your code here...
+
+      		return(TRUE);
+
+
+        // An SMS message has arrived for this app. Message is in the dwParam above as (char *)
+        // sender simply uses this format "//BREW:ClassId:Message", example //BREW:0x00000001:Hello World
+        case EVT_APP_MESSAGE:
+		    // Add your code here...
+
+      		return(TRUE);
+
+        // A key was pressed. Look at the wParam above to see which key was pressed. The key
+        // codes are in AEEVCodes.h. Example "AVK_1" means that the "1" key was pressed.
+        case EVT_KEY:
+		    // Add your code here...
+	if( pMe->m_pIMenu )
+		{
+			if( IMENUCTL_HandleEvent(pMe->m_pIMenu, EVT_KEY, wParam, dwParam) )
+				return TRUE;
+			else      return FALSE; 
+		}else if(wParam ==AVK_CLR){
+		//lab 1
+			if(pMe->m_pIStatic)
+			{
+				ISTATIC_Release(pMe->m_pIStatic);
+				pMe->m_pIStatic = NULL;
+			}
+			myiaddrbook_ShowMenu(pMe);
+		}
+		// end of lab 1
+		return TRUE;
+		
+	case EVT_COMMAND:
+		if( pMe->m_pIMenu )
+		{//lab 1
+			char *szWorkNum,*szHomeNum, *szName, *szEmail, *szURL, *szAddr,*szNotes;
+			AECHAR *aszWorkNum,*aszHomeNum, *aszName, *aszEmail, *aszURL, *aszAddr,*aszNotes;
+			AEEAddrField field[7];
+			boolean bRet = TRUE;
+			uint16   nSize;   
+			IAddrRec *pRec;
+			int nCount,nRet ;
+			
+			szWorkNum = (char *)MALLOC(20);
+			szHomeNum = (char *)MALLOC(20);
+			szName = (char *)MALLOC(30);
+			szEmail = (char *)MALLOC(30);
+			szURL = (char *)MALLOC(30);
+			szAddr = (char *)MALLOC(30);
+			szNotes = (char *)MALLOC(30);
+			
+			aszWorkNum = (AECHAR *)MALLOC(40);
+			aszHomeNum = (AECHAR *)MALLOC(40);
+			aszName = (AECHAR *)MALLOC(60);
+			aszEmail = (AECHAR *)MALLOC(60);
+			aszURL = (AECHAR *)MALLOC(60);
+			aszAddr = (AECHAR *)MALLOC(60);
+			aszNotes = (AECHAR *)MALLOC(60);
+			
+			if(!szWorkNum || !szHomeNum ||  !szName ||  !szEmail ||  !szURL ||  !szAddr || !szNotes || 
+				!aszWorkNum || !aszHomeNum ||  !aszName ||  !aszEmail ||  !aszURL ||  !aszAddr || 
+				!aszNotes)
+			{
+				return(FALSE);
+			}
+	// enf of lab 1
+			switch(IMENUCTL_GetSel(pMe->m_pIMenu))
+			{
+			case IDS_ADD_REC:
+			// lab 1
+				//Work Num
+				field[0].fID = AEE_ADDRFIELD_PHONE_WORK;
+				field[0].fType = AEEDB_FT_STRING;
+				STRCPY(szWorkNum,"13301330133");
+				STRTOWSTR(szWorkNum,aszWorkNum,40);
+				field[0].pBuffer= aszWorkNum;
+				field[0].wDataLen = (WSTRLEN(aszWorkNum)+1)*sizeof(AECHAR);
+				
+				//HOME Num
+				field[1].fID = AEE_ADDRFIELD_PHONE_HOME;
+				field[1].fType = AEEDB_FT_STRING;
+				STRCPY(szHomeNum,"01012345678");
+				STRTOWSTR(szHomeNum,aszHomeNum,40);
+				field[1].pBuffer= aszHomeNum;
+				field[1].wDataLen = (WSTRLEN(aszHomeNum)+1)*sizeof(AECHAR);
+				
+				//Name
+				field[2].fID = AEE_ADDRFIELD_NAME;
+				field[2].fType = AEEDB_FT_STRING;
+				STRCPY(szName,"My BREW");
+				STRTOWSTR(szName,aszName,60);
+				field[2].pBuffer= aszName;
+				field[2].wDataLen = (WSTRLEN(aszName)+1)*sizeof(AECHAR);
+				
+				//Email
+				field[3].fID = AEE_ADDRFIELD_EMAIL;
+				field[3].fType = AEEDB_FT_STRING;
+				STRCPY(szEmail,"me@brew.com");
+				STRTOWSTR(szEmail,aszEmail,60);
+				field[3].pBuffer= aszEmail;
+				field[3].wDataLen = (WSTRLEN(aszEmail)+1)*sizeof(AECHAR);
+				
+				
+				//URL
+				field[4].fID = AEE_ADDRFIELD_URL;
+				field[4].fType = AEEDB_FT_STRING;
+				STRCPY(szURL,"www.brew.com");
+				STRTOWSTR(szURL,aszURL,60);
+				field[4].pBuffer= aszURL;
+				field[4].wDataLen = (WSTRLEN(aszURL)+1)*sizeof(AECHAR);
+				
+				//Address
+				field[5].fID = AEE_ADDRFIELD_ADDRESS;
+				field[5].fType = AEEDB_FT_STRING;
+				STRCPY(szAddr,"F26,Kerry Center ");
+				STRTOWSTR(szAddr,aszAddr,60);
+				field[5].pBuffer= aszAddr;
+				field[5].wDataLen = (WSTRLEN(aszAddr)+1)*sizeof(AECHAR);
+				
+				
+				//Notes
+				field[6].fID = AEE_ADDRFIELD_NOTES;
+				field[6].fType = AEEDB_FT_STRING;
+				STRCPY(szNotes,"Test Notes.");
+				STRTOWSTR(szNotes,aszNotes,60);
+				field[6].pBuffer= aszNotes;
+				field[6].wDataLen = (WSTRLEN(aszNotes)+1)*sizeof(AECHAR);			
+
+               pRec = IADDRBOOK_CreateRec(pMe->m_pAddrBook,AEE_ADDR_CAT_PERSONAL, (AEEAddrField*)field, 7);
+
+               if(pRec)
+               {
+                  ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_ADD_REC_OK, szText, sizeof(szText));
+                  IADDRREC_Release(pRec);
+               }
+               else
+                  ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_ADD_REC_FAIL, szText, sizeof(szText));
+			// end of lab 1
+				break;
+			case IDS_ADD_FIELD:
+			// lab 2
+				STRCPY(szName,"My BREW");
+				STRTOWSTR(szName,aszName,60);
+				nSize = (WSTRLEN(aszName)+1) *sizeof(AECHAR);
+				
+				nRet = IADDRBOOK_EnumRecInit(pMe->m_pAddrBook,  AEE_ADDR_CAT_NONE, AEE_ADDRFIELD_NAME, (void *)aszName, nSize);
+				if(nRet == AEE_SUCCESS)
+				{
+					pRec = IADDRBOOK_EnumNextRec(pMe->m_pAddrBook);
+					if(pRec)
+					{
+						
+						//Fax Num
+						field[0].fID = AEE_ADDRFIELD_PHONE_FAX;
+						field[0].fType = AEEDB_FT_STRING;
+						STRCPY(szHomeNum,"01012341234");
+						STRTOWSTR(szHomeNum,aszHomeNum,40);
+						field[0].pBuffer= aszHomeNum;
+						field[0].wDataLen = (WSTRLEN(aszHomeNum)+1)*sizeof(AECHAR);
+						
+						if(IADDRREC_AddField(pRec,(AEEAddrField*)(&field[0])) == AEE_SUCCESS)
+							ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_ADD_FIELD_OK, szText, sizeof(szText));
+						else
+							ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_ADD_FIELD_FAIL, szText, sizeof(szText));
+						
+						IADDRREC_Release(pRec);
+					}
+					else
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_LOCATE_ERR, szText, sizeof(szText));
+				}
+				else
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_SEARCH_INI_ERR, szText, sizeof(szText));
+			// end of lab 2
+				break;
+			case IDS_UPDATE_FIELD:
+			// lab 3
+				STRCPY(szName,"My BREW");
+				STRTOWSTR(szName,aszName,60);
+				
+				nSize = (WSTRLEN(aszName)+1) *sizeof(AECHAR);
+				nRet = IADDRBOOK_EnumRecInit(pMe->m_pAddrBook,  AEE_ADDR_CAT_NONE, AEE_ADDRFIELD_NAME, (void *)aszName, nSize);
+				if(nRet == AEE_SUCCESS)
+				{
+					pRec = IADDRBOOK_EnumNextRec(pMe->m_pAddrBook);
+					if(pRec)
+					{						
+						//Change Work Phone Number
+						AEEAddrField newF, *ptr = NULL;
+						int i,nFields = IADDRREC_GetFieldCount(pRec);						
+						
+						for(i = 0; i < nFields; i++)
+						{
+							ptr = IADDRREC_GetField(pRec,i);
+							if(ptr->fID == AEE_ADDRFIELD_PHONE_WORK)
+								break;
+						}
+						if(ptr)
+						{
+							newF.fID = ptr->fID;
+							newF.fType = ptr->fType;
+							STRCPY(szWorkNum,"13331303130");
+							STRTOWSTR(szWorkNum,aszWorkNum,40);
+							newF.pBuffer = aszWorkNum;
+							newF.wDataLen = (WSTRLEN(aszWorkNum)+1)*sizeof(AECHAR);
+							
+							if(IADDRREC_UpdateField(pRec,i,&newF) == AEE_SUCCESS)
+								ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_UPDATE_FIELD_OK, szText, sizeof(szText));
+							else
+								ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_UPDATE_FIELD_FAIL, szText, sizeof(szText));
+						}
+						else
+							ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_LOCATE_FIELD_ERR, szText, sizeof(szText));
+						
+						IADDRREC_Release(pRec);
+					}
+					else
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_LOCATE_ERR, szText, sizeof(szText));
+				}
+				else
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_SEARCH_INI_ERR, szText, sizeof(szText));
+				// end of lab 3
+				break;
+			case IDS_DEL_FIELD:
+			//lab 4
+				STRCPY(szName,"My BREW");
+				STRTOWSTR(szName,aszName,60);
+				
+				nSize = (WSTRLEN(aszName)+1) *sizeof(AECHAR);
+				nRet = IADDRBOOK_EnumRecInit(pMe->m_pAddrBook,  AEE_ADDR_CAT_NONE, AEE_ADDRFIELD_NAME, (void *)aszName, nSize);
+				if(nRet == AEE_SUCCESS)
+				{
+					pRec = IADDRBOOK_EnumNextRec(pMe->m_pAddrBook);
+					if(pRec)
+					{
+						
+						nCount = IADDRREC_GetFieldCount(pRec);
+						
+						if(IADDRREC_RemoveField(pRec,nCount-1) == AEE_SUCCESS)
+							ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_DEL_FIELD_OK, szText, sizeof(szText));
+						else
+							ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_DEL_FIELD_FAIL, szText, sizeof(szText));
+						
+						IADDRREC_Release(pRec);
+					}
+					else
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_LOCATE_ERR, szText, sizeof(szText));
+				}
+				else
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYIADDRBOOK_RES_FILE, IDS_SEARCH_INI_ERR, szText, sizeof(szText));
+			// end of lab 4	
+					
+			 break;
+			case IDS_ENUM_FIELDS:
+				// lab 5
+			// end of lab 5
+				break;
+			case IDS_ENUM_CAT:
+			// lab 6
+		// end of lab 6
+				break;
+			case IDS_DEL_REC:
+			// lab 7
+			
+				// end of lab 7
+				break;
+			}
+				IMENUCTL_Release(pMe->m_pIMenu);
+				pMe->m_pIMenu = NULL;
+				//lab 1
+				IDISPLAY_ClearScreen(pMe->pIDisplay);
+				myiaddrbook_DiaplayInfo(pMe,szText);
+				// end of lab 1
+		}
+		break;
+
+        // If nothing fits up to this point then we'll just break out
+        default:
+            break;
+   }
+
+   return FALSE;
+}
+
+
+// this function is called when your application is starting up
+boolean myiaddrbook_InitAppData(myiaddrbook* pMe)
+{
+    // Get the device information for this handset.
+    // Reference all the data by looking at the pMe->DeviceInfo structure
+    // Check the API reference guide for all the handy device info you can get
+    pMe->DeviceInfo.wStructSize = sizeof(pMe->DeviceInfo);
+    ISHELL_GetDeviceInfo(pMe->a.m_pIShell,&pMe->DeviceInfo);
+
+    // The display and shell interfaces are always created by
+    // default, so we'll asign them so that you can access
+    // them via the standard "pMe->" without the "a."
+    pMe->pIDisplay = pMe->a.m_pIDisplay;
+    pMe->pIShell   = pMe->a.m_pIShell;
+
+    // Insert your code here for initializing or allocating resources...
+
+	if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void **)&pMe->m_pIMenu) !=SUCCESS)
+	{
+		IMENUCTL_Release( pMe->m_pIMenu );
+		return EFAILED;
+	}
+	// lab 1
+	if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&pMe->m_pIStatic) !=SUCCESS)
+	{
+		ISTATIC_Release( pMe->m_pIStatic );
+		return EFAILED;
+	}
+	if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_ADDRBOOK, (void **)(&pMe->m_pAddrBook))!=SUCCESS )
+		return EFAILED;
+// end of lab 1
+    // if there have been no failures up to this point then return success
+    return TRUE;
+}
+
+// this function is called when your application is exiting
+void myiaddrbook_FreeAppData(myiaddrbook* pMe)
+{
+    // insert your code here for freeing any resources you have allocated...
+
+    // example to use for releasing each interface:
+	if( pMe->m_pIMenu )
+	{
+		IMENUCTL_Release(pMe->m_pIMenu);
+		pMe->m_pIMenu = NULL;
+	}
+	// lab 1
+		if(pMe->m_pAddrBook)
+	{
+		IADDRBOOK_Release(pMe->m_pAddrBook);
+		pMe->m_pAddrBook = NULL;
+	}
+	if(pMe->m_pIStatic)
+	{
+		ISTATIC_Release(pMe->m_pIStatic);
+		pMe->m_pIStatic = NULL;
+	}
+	// end of lab 1
+}
+static void  myiaddrbook_ShowMenu(myiaddrbook* pMe)
+{
+	CtlAddItem  ai;
+	if (! pMe->m_pIMenu)
+		ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void **)&pMe->m_pIMenu) ;
+	
+	ai.pText = NULL;
+	ai.pImage = NULL;
+	ai.pszResImage = MYIADDRBOOK_RES_FILE;
+	ai.pszResText = MYIADDRBOOK_RES_FILE;
+	ai.wFont = AEE_FONT_NORMAL;
+	ai.dwData = NULL;
+	
+	ai.wText = IDS_ADD_REC;   
+	ai.wImage = IDB_MENU;
+	ai.wItemID = IDS_ADD_REC;
+	
+	
+	// Add the item to the menu control
+	if(IMENUCTL_AddItemEx(pMe->m_pIMenu, &ai )==FALSE)
+	{
+		IMENUCTL_Release(pMe->m_pIMenu);
+		return;
+	}
+	
+	ai.wText = IDS_ADD_FIELD;
+	ai.wItemID = IDS_ADD_FIELD;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	
+	ai.wText = IDS_UPDATE_FIELD;
+	ai.wItemID = IDS_UPDATE_FIELD;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	ai.wText = IDS_DEL_FIELD;
+	ai.wItemID = IDS_DEL_FIELD;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	
+	ai.wText = IDS_ENUM_FIELDS;
+	ai.wItemID = IDS_ENUM_FIELDS;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+		ai.wText = IDS_ENUM_CAT;
+	ai.wItemID = IDS_ENUM_CAT;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+
+		ai.wText = IDS_DEL_REC;
+	ai.wItemID = IDS_DEL_REC;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	IMENUCTL_SetActive(pMe->m_pIMenu,TRUE);
+}
+
+// lab 1
+static void	 myiaddrbook_DiaplayInfo(myiaddrbook* pMe,AECHAR* pInfo)
+{
+	AEERect rct;
+	
+	if(!pMe->m_pIStatic)
+		ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&pMe->m_pIStatic);
+	SETAEERECT(&rct, 16, 16, pMe->DeviceInfo.cxScreen-32, pMe->DeviceInfo.cyScreen-32);
+	ISTATIC_SetRect(pMe->m_pIStatic, &rct);
+	ISTATIC_SetText(pMe->m_pIStatic, NULL,pInfo, AEE_FONT_BOLD, AEE_FONT_NORMAL);
+	ISTATIC_Redraw(pMe->m_pIStatic);
+}
+// end of lab 1

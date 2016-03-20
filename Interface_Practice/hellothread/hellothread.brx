@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="isms" VERSION="1">
+<Strings Encoding="Unicode">
+	<String Id="1001" Name="IDS_MO_TEXT_UNICODE">
+		<Text>你的朋友向你推荐手机游戏－数独，你可从软件超市下载</Text>
+	</String>
+</Strings>
+</BREWRes>

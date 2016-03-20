@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="imgpros" VERSION="1">
+<Strings Encoding="Unicode">
+	<String Id="1001" Name="IDC_ORIGINAL">
+		<Text>Original</Text>
+	</String>
+	<String Id="1004" Name="IDC_ITRANSEFORM">
+		<Text>Itransform</Text>
+	</String>
+</Strings>
+<Objects MimeType="image/png">
+	<Object Id="5003" Name="IDI_IMAGE">
+		<File>.\img\image2.png</File>
+	</Object>
+</Objects>
+</BREWRes>

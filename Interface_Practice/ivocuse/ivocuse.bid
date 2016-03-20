@@ -1,0 +1,6 @@
+#ifndef IVOCUSE_BID
+#define IVOCUSE_BID
+
+#define AEECLSID_IVOCUSE        0xFEEFEEDA
+
+#endif //IVOCUSE_BID

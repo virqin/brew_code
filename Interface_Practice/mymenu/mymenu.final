@@ -1,0 +1,372 @@
+/*===========================================================================
+
+FILE: mymenu.c
+===========================================================================*/
+
+
+/*===============================================================================
+INCLUDES AND VARIABLE DEFINITIONS
+=============================================================================== */
+#include "AEEModGen.h"          // Module interface definitions
+#include "AEEAppGen.h"          // Applet interface definitions
+#include "AEEShell.h"           // Shell interface definitions
+
+#include "mymenu.bid"
+#include "mymenu_res.h"
+#include "AEEMenu.h"
+
+// defination for the menu items
+#define ID_ENTER 1
+#define ID_HELP  2
+#define ID_ABOUT 3
+
+/*-------------------------------------------------------------------
+Applet structure. All variables in here are reference via "pMe->"
+-------------------------------------------------------------------*/
+// create an applet structure that's passed around. All variables in
+// here will be able to be referenced as static.
+typedef struct _mymenu {
+	AEEApplet      a ;	       // First element of this structure must be AEEApplet
+    AEEDeviceInfo  DeviceInfo; // always have access to the hardware device information
+    IDisplay      *pIDisplay;  // give a standard way to access the Display interface
+    IShell        *pIShell;    // give a standard way to access the Shell interface
+
+    // add your own variables here...
+	IMenuCtl       *pMenu;
+    int            state;
+
+} mymenu;
+
+/*-------------------------------------------------------------------
+Function Prototypes
+-------------------------------------------------------------------*/
+static  boolean mymenu_HandleEvent(mymenu* pMe, AEEEvent eCode, 
+                                             uint16 wParam, uint32 dwParam);
+boolean mymenu_InitAppData(mymenu* pMe);
+void    mymenu_FreeAppData(mymenu* pMe);
+static void BuildMainMenu(mymenu *pMe);
+
+/*===============================================================================
+FUNCTION DEFINITIONS
+=============================================================================== */
+
+/*===========================================================================
+FUNCTION: AEEClsCreateInstance
+
+DESCRIPTION
+	This function is invoked while the app is being loaded. All Modules must provide this 
+	function. Ensure to retain the same name and parameters for this function.
+	In here, the module must verify the ClassID and then invoke the AEEApplet_New() function
+	that has been provided in AEEAppGen.c. 
+
+   After invoking AEEApplet_New(), this function can do app specific initialization. In this
+   example, a generic structure is provided so that app developers need not change app specific
+   initialization section every time except for a call to IDisplay_InitAppData(). 
+   This is done as follows: InitAppData() is called to initialize AppletData 
+   instance. It is app developers responsibility to fill-in app data initialization 
+   code of InitAppData(). App developer is also responsible to release memory 
+   allocated for data contained in AppletData -- this can be done in 
+   IDisplay_FreeAppData().
+
+PROTOTYPE:
+   int AEEClsCreateInstance(AEECLSID ClsId,IShell * pIShell,IModule * po,void ** ppObj)
+
+PARAMETERS:
+	clsID: [in]: Specifies the ClassID of the applet which is being loaded
+
+	pIShell: [in]: Contains pointer to the IShell object. 
+
+	pIModule: pin]: Contains pointer to the IModule object to the current module to which
+	this app belongs
+
+	ppObj: [out]: On return, *ppObj must point to a valid IApplet structure. Allocation
+	of memory for this structure and initializing the base data members is done by AEEApplet_New().
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  AEE_SUCCESS: If the app needs to be loaded and if AEEApplet_New() invocation was
+     successful
+  EFAILED: If the app does not need to be loaded or if errors occurred in 
+     AEEApplet_New(). If this function returns FALSE, the app will not be loaded.
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+int AEEClsCreateInstance(AEECLSID ClsId, IShell *pIShell, IModule *po, void **ppObj)
+{
+	*ppObj = NULL;
+
+	if( ClsId == AEECLSID_MYMENU )
+	{
+		// Create the applet and make room for the applet structure
+		if( AEEApplet_New(sizeof(mymenu),
+                          ClsId,
+                          pIShell,
+                          po,
+                          (IApplet**)ppObj,
+                          (AEEHANDLER)mymenu_HandleEvent,
+                          (PFNFREEAPPDATA)mymenu_FreeAppData) ) // the FreeAppData function is called after sending EVT_APP_STOP to the HandleEvent function
+                          
+		{
+			//Initialize applet data, this is called before sending EVT_APP_START
+            // to the HandleEvent function
+			if(mymenu_InitAppData((mymenu*)*ppObj))
+			{
+				//Data initialized successfully
+				return(AEE_SUCCESS);
+			}
+			else
+			{
+				//Release the applet. This will free the memory allocated for the applet when
+				// AEEApplet_New was called.
+				IAPPLET_Release((IApplet*)*ppObj);
+				return EFAILED;
+			}
+
+        } // end AEEApplet_New
+
+    }
+
+	return(EFAILED);
+}
+
+
+/*===========================================================================
+FUNCTION SampleAppWizard_HandleEvent
+
+DESCRIPTION
+	This is the EventHandler for this app. All events to this app are handled in this
+	function. All APPs must supply an Event Handler.
+
+PROTOTYPE:
+	boolean SampleAppWizard_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+
+PARAMETERS:
+	pi: Pointer to the AEEApplet structure. This structure contains information specific
+	to this applet. It was initialized during the AEEClsCreateInstance() function.
+
+	ecode: Specifies the Event sent to this applet
+
+   wParam, dwParam: Event specific data.
+
+DEPENDENCIES
+  none
+
+RETURN VALUE
+  TRUE: If the app has processed the event
+  FALSE: If the app did not process the event
+
+SIDE EFFECTS
+  none
+===========================================================================*/
+static boolean mymenu_HandleEvent(mymenu* pMe, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+{  
+	uint16  item;
+
+    if(pMe->pMenu && IMENUCTL_HandleEvent(pMe->pMenu,eCode,wParam,dwParam) )
+	    return TRUE;
+
+    switch (eCode) 
+	{
+        // App is told it is starting up
+        case EVT_APP_START:                        
+		    // Add your code here...
+			BuildMainMenu(pMe);
+            return(TRUE);
+
+
+        // App is told it is exiting
+        case EVT_APP_STOP:
+            // Add your code here...
+
+      		return(TRUE);
+
+
+        // App is being suspended 
+        case EVT_APP_SUSPEND:
+		    // Add your code here...
+			IMENUCTL_Release(pMe->pMenu);
+			pMe->pMenu = NULL;
+
+      		return(TRUE);
+
+
+        // App is being resumed
+        case EVT_APP_RESUME:
+		    // Add your code here...
+			BuildMainMenu(pMe);
+
+      		return(TRUE);
+
+
+        // An SMS message has arrived for this app. Message is in the dwParam above as (char *)
+        // sender simply uses this format "//BREW:ClassId:Message", example //BREW:0x00000001:Hello World
+        case EVT_APP_MESSAGE:
+		    // Add your code here...
+
+      		return(TRUE);
+
+        // A key was pressed. Look at the wParam above to see which key was pressed. The key
+        // codes are in AEEVCodes.h. Example "AVK_1" means that the "1" key was pressed.
+        case EVT_KEY:
+//lab 6
+		    // Add your code here...
+			if((wParam == AVK_CLR) && (pMe->state == 2)){
+				IMENUCTL_Redraw(pMe->pMenu);
+			    IMENUCTL_SetActive(pMe->pMenu,TRUE);
+			    pMe->state = 1;
+				return TRUE;
+			}
+      		return(FALSE);
+
+		 case EVT_COMMAND:
+			 item = IMENUCTL_GetSel (pMe->pMenu);
+			 switch(item)
+			  {
+			  case ID_ENTER:
+				  {
+//lab 5
+				  AECHAR szText[] = {'e','n', 't', 'e','r', '\0'};
+				  IMENUCTL_SetActive(pMe->pMenu,FALSE);
+				  IDISPLAY_ClearScreen(pMe->pIDisplay);
+				  IDISPLAY_DrawText(pMe->pIDisplay,    // Display instance
+                           AEE_FONT_BOLD,       // Use BOLD font
+                           szText,              // Text - Normally comes from resource
+                           -1,                  // -1 = Use full string length
+                           0,                   // Ignored - IDF_ALIGN_CENTER
+                           0,                   // Ignored - IDF_ALIGN_MIDDLE
+                           NULL,                // No clipping
+                           IDF_ALIGN_CENTER | IDF_ALIGN_MIDDLE);
+                  IDISPLAY_Update (pMe->pIDisplay);
+				  pMe->state =2;
+				  }
+				  break;
+			  case ID_HELP:
+				  {
+//lab 5
+				  AECHAR szText[] = {'h','e', 'l', 'p','!', '\0'};
+				  IMENUCTL_SetActive(pMe->pMenu,FALSE);
+				  IDISPLAY_ClearScreen(pMe->pIDisplay);
+				  IDISPLAY_DrawText(pMe->pIDisplay,    // Display instance
+                           AEE_FONT_BOLD,       // Use BOLD font
+                           szText,              // Text - Normally comes from resource
+                           -1,                  // -1 = Use full string length
+                           0,                   // Ignored - IDF_ALIGN_CENTER
+                           0,                   // Ignored - IDF_ALIGN_MIDDLE
+                           NULL,                // No clipping
+                           IDF_ALIGN_CENTER | IDF_ALIGN_MIDDLE);
+                  IDISPLAY_Update (pMe->pIDisplay);
+				  pMe->state =2;
+				  }
+				  break;
+			  case ID_ABOUT:
+				  {
+//lab 5
+				  AECHAR szText[] = {'a','b', 'o', 'u', 't','!', '\0'};
+				  IMENUCTL_SetActive(pMe->pMenu,FALSE);
+				  IDISPLAY_ClearScreen(pMe->pIDisplay);
+				  IDISPLAY_DrawText(pMe->pIDisplay,    // Display instance
+                           AEE_FONT_BOLD,       // Use BOLD font
+                           szText,              // Text - Normally comes from resource
+                           -1,                  // -1 = Use full string length
+                           0,                   // Ignored - IDF_ALIGN_CENTER
+                           0,                   // Ignored - IDF_ALIGN_MIDDLE
+                           NULL,                // No clipping
+                           IDF_ALIGN_CENTER | IDF_ALIGN_MIDDLE);
+                  IDISPLAY_Update (pMe->pIDisplay);
+				  pMe->state =2;
+				  }
+				  break;
+			  default:
+				  break;
+			  }
+			  return TRUE;
+
+        // If nothing fits up to this point then we'll just break out
+        default:
+            break;
+   }
+   return FALSE;
+}
+
+
+// this function is called when your application is starting up
+boolean mymenu_InitAppData(mymenu* pMe)
+{
+    // Get the device information for this handset.
+    // Reference all the data by looking at the pMe->DeviceInfo structure
+    // Check the API reference guide for all the handy device info you can get
+
+
+    // The display and shell interfaces are always created by
+    // default, so we'll asign them so that you can access
+    // them via the standard "pMe->" without the "a."
+    pMe->pIDisplay = pMe->a.m_pIDisplay;
+    pMe->pIShell   = pMe->a.m_pIShell;
+
+    // Insert your code here for initializing or allocating resources...
+	pMe->pMenu = NULL;
+    pMe->state =0;
+    pMe->DeviceInfo.wStructSize = sizeof(pMe->DeviceInfo);
+    ISHELL_GetDeviceInfo(pMe->a.m_pIShell,&pMe->DeviceInfo);
+
+    // if there have been no failures up to this point then return success
+    return TRUE;
+}
+
+// this function is called when your application is exiting
+void mymenu_FreeAppData(mymenu* pMe)
+{
+    // insert your code here for freeing any resources you have allocated...
+
+    // example to use for releasing each interface:
+    // if ( pMe->pIMenuCtl != NULL )         // check for NULL first
+    // {
+    //    IMENUCTL_Release(pMe->pIMenuCtl)   // release the interface
+    //    pMe->pIMenuCtl = NULL;             // set to NULL so no problems trying to free later
+    // }
+    //
+	if(pMe->pMenu != NULL)
+	{
+		IMENUCTL_Release(pMe->pMenu);
+		pMe->pMenu = NULL;
+	}
+}
+
+static void BuildMainMenu(mymenu *pMe)
+{
+	CtlAddItem  pai;
+
+	if(ISHELL_CreateInstance(pMe->pIShell,AEECLSID_MENUCTL,(void**)&pMe->pMenu) != SUCCESS)
+		return ;
+//lab 1
+	IMENUCTL_SetTitle(pMe->pMenu,MYMENU_RES_FILE,IDS_TITLE,NULL);
+//lab 2
+	pai.pText = NULL;
+	pai.pImage = NULL;
+	pai.wFont = AEE_FONT_BOLD;
+	pai.dwData = NULL;
+
+	pai.pszResImage = MYMENU_RES_FILE;
+	pai.pszResText = MYMENU_RES_FILE;
+
+	pai.wText = IDS_ENTER;
+	pai.wImage = IDB_ENTER;
+	pai.wItemID = ID_ENTER;
+	IMENUCTL_AddItemEx(pMe->pMenu,&pai);
+//lab 3
+	pai.wText = IDS_HELP;
+	pai.wImage = IDB_HELP;
+	pai.wItemID = ID_HELP;
+	IMENUCTL_AddItemEx(pMe->pMenu,&pai);
+//lab 4
+	pai.wText = IDS_ABOUT;
+	pai.wImage = IDB_ABOUT;
+	pai.wItemID = ID_ABOUT;
+	IMENUCTL_AddItemEx(pMe->pMenu,&pai);
+
+	IMENUCTL_SetActive(pMe->pMenu,TRUE);
+	pMe->state = 1;
+}

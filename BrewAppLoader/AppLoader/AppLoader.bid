@@ -1,0 +1,6 @@
+#ifndef APPLOADER_BID
+#define APPLOADER_BID
+
+#define AEECLSID_APPLOADER        0x88888881
+
+#endif //APPLOADER_BID

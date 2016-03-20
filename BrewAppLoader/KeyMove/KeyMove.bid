@@ -1,0 +1,6 @@
+#ifndef KEYMOVE_BID
+#define KEYMOVE_BID
+
+#define AEECLSID_KEYMOVE        0x88888886
+
+#endif //KEYMOVE_BID

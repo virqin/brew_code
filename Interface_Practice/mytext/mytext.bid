@@ -1,0 +1,6 @@
+#ifndef MYTEXT_BID
+#define MYTEXT_BID
+
+#define AEECLSID_MYTEXT        0x90000008
+
+#endif //MYTEXT_BID

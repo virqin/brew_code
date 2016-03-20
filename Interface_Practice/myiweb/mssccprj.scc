@@ -1,0 +1,9 @@
+SCC = This is a Source Code Control file
+
+[myiweb.dsp]
+SCC_Aux_Path = "\\10.10.10.9\brew_vss\"
+SCC_Project_Name = "$/BREW Training/sample/myiweb", BIFAAAAA
+
+[myiweb.dsw]
+SCC_Aux_Path = "\\10.10.10.9\brew_vss\"
+SCC_Project_Name = "$/BREW Training/sample/myiweb", BIFAAAAA

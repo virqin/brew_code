@@ -1,0 +1,6 @@
+#ifndef MYIWEB_BID
+#define MYIWEB_BID
+
+#define AEECLSID_MYIWEB        0x9000000C
+
+#endif //MYIWEB_BID

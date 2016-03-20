@@ -1,0 +1,6 @@
+#ifndef DEMO_BID
+#define DEMO_BID
+
+#define AEECLSID_DEMO        0x0A0A0A0A
+
+#endif //DEMO_BID

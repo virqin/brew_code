@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<BREWRes Name="isms" VERSION="1"> 
+<Strings Encoding="Unicode"> 
+	<String Id="1001" Name="IDS_MO_TEXT_UNICODE"> 
+		<Text>你的朋友向你推荐手机游戏－数独，你可从软件超市下载</Text> 
+	</String> 
+	<String Id="1002" Name="IDS_SMS_TAG"> 
+		<Text>3</Text> 
+	</String> 
+	<String Id="1003" Name="IDS_SMS_MT"> 
+		<Text>2</Text> 
+	</String> 
+</Strings> 
+</BREWRes> 

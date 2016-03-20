@@ -1,0 +1,6 @@
+#ifndef MYMENU_BID
+#define MYMENU_BID
+
+#define AEECLSID_MYMENU        0x90000003
+
+#endif //MYMENU_BID

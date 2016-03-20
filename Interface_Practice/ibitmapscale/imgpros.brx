@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="imgpros" VERSION="1">
+<Strings Encoding="Unicode">
+	<String Id="1001" Name="IDC_MAIN_MENU">
+		<Text>Main Menu</Text>
+	</String>
+	<String Id="1002" Name="IDC_IMAGE_ONE">
+		<Text>Image One</Text>
+	</String>
+	<String Id="1004" Name="IDC_IBITMAPSCALE">
+		<Text>IBitmap Scale</Text>
+	</String>
+</Strings>
+<Objects MimeType="image/png">
+	<Object Id="5001" Name="IDI_IMAGE_ONE">
+		<File>.\img\image1.png</File>
+	</Object>
+</Objects>
+</BREWRes>

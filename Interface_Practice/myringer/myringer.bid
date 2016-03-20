@@ -1,0 +1,6 @@
+#ifndef MYRINGER_BID
+#define MYRINGER_BID
+
+#define AEECLSID_MYRINGER        0x90000010
+
+#endif //MYRINGER_BID

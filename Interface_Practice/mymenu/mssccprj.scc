@@ -1,0 +1,17 @@
+SCC = This is a Source Code Control file
+
+[mymenu.dsp]
+SCC_Aux_Path = "\\10.10.10.9\brew_vss\"
+SCC_Project_Name = "$/BREW Training/sample/mymenu", SQFAAAAA
+
+[mymenu.dsw]
+SCC_Aux_Path = "\\10.10.10.9\brew_vss\"
+SCC_Project_Name = "$/BREW Training/sample/mymenu", SQFAAAAA
+
+[mymenu.sln]
+SCC_Aux_Path = "\\10.10.10.9\brew_vss\"
+SCC_Project_Name = "$/BREW Training/sample/mymenu", SQFAAAAA
+
+[mymenu.vcproj]
+SCC_Aux_Path = "\\10.10.10.9\brew_vss\"
+SCC_Project_Name = "$/BREW Training/sample/mymenu", SQFAAAAA

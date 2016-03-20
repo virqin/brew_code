@@ -1,0 +1,6 @@
+#ifndef FLYVIDEO_BID
+#define FLYVIDEO_BID
+
+#define AEECLSID_FLYVIDEO        0x55555555
+
+#endif //FLYVIDEO_BID

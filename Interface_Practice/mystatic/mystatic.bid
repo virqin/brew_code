@@ -1,0 +1,6 @@
+#ifndef MYSTATIC_BID
+#define MYSTATIC_BID
+
+#define AEECLSID_MYSTATIC        0x90000004
+
+#endif //MYSTATIC_BID

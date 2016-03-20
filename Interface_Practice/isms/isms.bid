@@ -1,0 +1,6 @@
+#ifndef ISMS_BID
+#define ISMS_BID
+
+#define AEECLSID_ISMS        0x01080313
+
+#endif //ISMS_BID

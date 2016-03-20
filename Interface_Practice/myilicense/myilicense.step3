@@ -1,0 +1,377 @@
+/*===========================================================================
+
+  FILE: myILicense.c
+===========================================================================*/
+
+
+/*===============================================================================
+INCLUDES AND VARIABLE DEFINITIONS
+=============================================================================== */
+#include "AEEModGen.h"          // Module interface definitions
+#include "AEEAppGen.h"          // Applet interface definitions
+#include "AEEShell.h"           // Shell interface definitions
+#include "AEE.h"
+#include "AEESTDLIB.h"
+#include "myILicense.bid"
+#include "myilicense_res.h"
+
+// lab 1
+#include "AEELicense.h" // AEE License Services
+// end of lab 1
+
+#include "AEEMenu.h"    // AEE Menu Services
+
+/*-------------------------------------------------------------------
+Applet structure. All variables in here are reference via "pMe->"
+-------------------------------------------------------------------*/
+typedef struct _myILicense {
+	AEEApplet      a ;	       // First element of this structure must be AEEApplet
+    AEEDeviceInfo  DeviceInfo; // always have access to the hardware device information
+    IDisplay      *pIDisplay;  // give a standard way to access the Display interface
+    IShell        *pIShell;    // give a standard way to access the Shell interface
+	
+    // add your own variables here...
+
+	IMenuCtl *        m_pIMenu;
+	//lab 1
+	IStatic *		m_pIStatic;
+	ILicense *	      m_pLicense;	
+	//end of lab 1
+} myILicense;
+
+/*-------------------------------------------------------------------
+Function Prototypes
+-------------------------------------------------------------------*/
+static  boolean myILicense_HandleEvent(myILicense* pMe, AEEEvent eCode, 
+									   uint16 wParam, uint32 dwParam);
+boolean myILicense_InitAppData(myILicense* pMe);
+void    myILicense_FreeAppData(myILicense* pMe);
+
+static void  myILicense_ShowMenu(myILicense* pMe);
+//lab 1
+static void	 myILicense_DiaplayInfo(myILicense* pMe,AECHAR* pInfo);
+// end of lab 1
+/*===============================================================================
+FUNCTION DEFINITIONS
+=============================================================================== */
+
+/*===========================================================================
+FUNCTION: AEEClsCreateInstance
+===========================================================================*/
+int AEEClsCreateInstance(AEECLSID ClsId, IShell *pIShell, IModule *po, void **ppObj)
+{
+	*ppObj = NULL;
+	
+	if( ClsId == AEECLSID_MYILICENSE )
+	{
+		// Create the applet and make room for the applet structure
+		if( AEEApplet_New(sizeof(myILicense),
+			ClsId,
+			pIShell,
+			po,
+			(IApplet**)ppObj,
+			(AEEHANDLER)myILicense_HandleEvent,
+			(PFNFREEAPPDATA)myILicense_FreeAppData) ) // the FreeAppData function is called after sending EVT_APP_STOP to the HandleEvent function
+			
+		{
+			//Initialize applet data, this is called before sending EVT_APP_START
+            // to the HandleEvent function
+			if(myILicense_InitAppData((myILicense*)*ppObj))
+			{
+				//Data initialized successfully
+				return(AEE_SUCCESS);
+			}
+			else
+			{
+				//Release the applet. This will free the memory allocated for the applet when
+				// AEEApplet_New was called.
+				IAPPLET_Release((IApplet*)*ppObj);
+				return EFAILED;
+			}
+			
+        } // end AEEApplet_New
+		
+    }
+	
+	return(EFAILED);
+}
+
+
+/*===========================================================================
+FUNCTION SampleAppWizard_HandleEvent
+===========================================================================*/
+static boolean myILicense_HandleEvent(myILicense* pMe, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+{  
+	AEELicenseType licType     = 0;
+	AEEPriceType		priceType = 0;
+	uint32         dwLicRemain = 0;
+	AECHAR szText[64];
+	char sRemain[4];
+	AECHAR szRemain[8];
+    switch (eCode) 
+	{
+        // App is told it is starting up
+	case EVT_APP_START:                        
+		// Add your code here...
+		myILicense_ShowMenu(pMe);
+		return(TRUE);
+		
+		
+        // App is told it is exiting
+	case EVT_APP_STOP:
+		// Add your code here...
+		
+      		return(TRUE);
+			
+			
+			// App is being suspended 
+	case EVT_APP_SUSPEND:
+		// Add your code here...
+		
+      		return(TRUE);
+			
+			
+			// App is being resumed
+	case EVT_APP_RESUME:
+		// Add your code here...
+		
+      		return(TRUE);
+			
+			
+			// An SMS message has arrived for this app. Message is in the dwParam above as (char *)
+			// sender simply uses this format "//BREW:ClassId:Message", example //BREW:0x00000001:Hello World
+	case EVT_APP_MESSAGE:
+		// Add your code here...
+		
+      		return(TRUE);
+			
+			// A key was pressed. Look at the wParam above to see which key was pressed. The key
+			// codes are in AEEVCodes.h. Example "AVK_1" means that the "1" key was pressed.
+	case EVT_KEY: 
+		if( pMe->m_pIMenu )
+		{
+			if( IMENUCTL_HandleEvent(pMe->m_pIMenu, EVT_KEY, wParam, dwParam) )
+				return TRUE;
+			else      return FALSE; 
+		}else if(wParam ==AVK_CLR){
+		//lab 1
+			if(pMe->m_pIStatic)
+			{
+				ISTATIC_Release(pMe->m_pIStatic);
+				pMe->m_pIStatic = NULL;
+			}
+			//end of lab 1
+			myILicense_ShowMenu(pMe);
+		}
+		return TRUE;
+		
+	case EVT_COMMAND:
+		if( pMe->m_pIMenu )
+		{
+			switch(IMENUCTL_GetSel(pMe->m_pIMenu))
+			{
+			case IDS_LICENSE:
+			//lab 2
+				licType = ILICENSE_GetInfo(pMe->m_pLicense, &dwLicRemain);
+				switch(licType)
+				{						
+				case LT_USES: 
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_LIC_USES, szText, sizeof(szText));	
+					break;
+				case LT_DATE :
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_LIC_DATE, szText, sizeof(szText));
+					break;
+				case LT_DAYS :
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_LIC_DAYS, szText, sizeof(szText));
+					break;
+				case LT_MINUTES_OF_USE:
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_LIC_MINUTES, szText, sizeof(szText));
+					break;
+				default:
+					ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_UNKNOWN, szText, sizeof(szText));
+				}
+				// end of lab 2
+				break;
+				case IDS_PURCHASE	:
+				// lab 3
+					licType = ILICENSE_GetInfo(pMe->m_pLicense, &dwLicRemain);
+					priceType = ILICENSE_GetPurchaseInfo(pMe->m_pLicense, &licType,NULL,NULL);
+					switch(priceType)
+					{
+					case PT_DEMO:// Demo version
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_BUY_DEMO, szText, sizeof(szText));
+						break;
+					case PT_PURCHASE: //Normally purchased version
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_BUY_PURCHASE, szText, sizeof(szText));
+						break;
+					case PT_SUBSCRIPTION: //Subscription version
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_BUY_MONTH, szText, sizeof(szText));
+						break;
+					case PT_UPGRADE: //Upgrade
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_BUY_UPGRADE, szText, sizeof(szText));
+						break;
+					default:
+						ISHELL_LoadResString(pMe->a.m_pIShell, MYILICENSE_RES_FILE, IDS_UNKNOWN, szText, sizeof(szText));
+					}
+					// end of lab 3
+					break;
+					case IDS_ADDONE		:
+					//lab 4
+						// end of lab 4
+						
+						break;
+					case IDS_MINUSONE:
+					// lab 5
+							// end of lab 5
+						break;
+					case IDS_SETUSES	:
+						//lab 6
+						//	end of lab 6
+						break;
+			  }
+			  IMENUCTL_Release(pMe->m_pIMenu);
+			  pMe->m_pIMenu = NULL;
+			  //lab 2
+			  IDISPLAY_ClearScreen(pMe->pIDisplay);
+			  myILicense_DiaplayInfo(pMe,szText);
+			  //end of lab 2
+           }			
+		   break;
+		   // If nothing fits up to this point then we'll just break out
+        default:
+            break;
+   }
+   
+   return FALSE;
+}
+
+
+// this function is called when your application is starting up
+boolean myILicense_InitAppData(myILicense* pMe)
+{
+    // Get the device information for this handset.
+    // Reference all the data by looking at the pMe->DeviceInfo structure
+    // Check the API reference guide for all the handy device info you can get
+    pMe->DeviceInfo.wStructSize = sizeof(pMe->DeviceInfo);
+    ISHELL_GetDeviceInfo(pMe->a.m_pIShell,&pMe->DeviceInfo);
+	
+    // The display and shell interfaces are always created by
+    // default, so we'll asign them so that you can access
+    // them via the standard "pMe->" without the "a."
+    pMe->pIDisplay = pMe->a.m_pIDisplay;
+    pMe->pIShell   = pMe->a.m_pIShell;
+	
+    // Insert your code here for initializing or allocating resources...
+	
+
+	if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void **)&pMe->m_pIMenu) !=SUCCESS)
+	{
+		IMENUCTL_Release( pMe->m_pIMenu );
+		return EFAILED;
+	}
+	// lab 1
+		
+	if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_LICENSE, (void **)(&pMe->m_pLicense))!=SUCCESS )
+		return EFAILED;
+	if( ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&pMe->m_pIStatic) !=SUCCESS)
+	{
+		ISTATIC_Release( pMe->m_pIStatic );
+		return EFAILED;
+	}
+	// end of lab 1
+    // if there have been no failures up to this point then return success
+    return TRUE;
+}
+
+// this function is called when your application is exiting
+void myILicense_FreeAppData(myILicense* pMe)
+{
+    // insert your code here for freeing any resources you have allocated...
+	
+
+	
+	// Release the IMenuCtl instance used to display the main app menu
+	if( pMe->m_pIMenu )
+	{
+		IMENUCTL_Release(pMe->m_pIMenu);
+		pMe->m_pIMenu = NULL;
+	}
+	// lab 1
+	// Release the IStatic instance used to display the main app menu
+	if( pMe->m_pIStatic)
+	{
+		ISTATIC_Release( pMe->m_pIStatic );
+		pMe->m_pIStatic = NULL;
+	}
+		// Release the ILicense instance used to track usage
+	if( pMe->m_pLicense )
+	{
+		ILICENSE_Release(pMe->m_pLicense);
+		pMe->m_pLicense = NULL;
+	}
+	// end of lab 1
+}
+static void myILicense_ShowMenu(myILicense* pMe)
+{
+	CtlAddItem  ai;
+	if (! pMe->m_pIMenu)
+		ISHELL_CreateInstance(pMe->pIShell, AEECLSID_MENUCTL, (void **)&pMe->m_pIMenu) ;
+	
+	ai.pText = NULL;
+	ai.pImage = NULL;
+	ai.pszResImage = MYILICENSE_RES_FILE;
+	ai.pszResText = MYILICENSE_RES_FILE;
+	ai.wFont = AEE_FONT_NORMAL;
+	ai.dwData = NULL;
+	
+	ai.wText = IDS_LICENSE;   
+	ai.wImage = IDB_MENU;
+	ai.wItemID = IDS_LICENSE;
+	
+	
+	// Add the item to the menu control
+	if(IMENUCTL_AddItemEx(pMe->m_pIMenu, &ai )==FALSE)
+	{
+		IMENUCTL_Release(pMe->m_pIMenu);
+		return;
+	}
+	
+	ai.wText = IDS_PURCHASE;
+	ai.wItemID = IDS_PURCHASE;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	
+	ai.wText = IDS_ADDONE;
+	ai.wItemID = IDS_ADDONE;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	ai.wText = IDS_MINUSONE;
+	ai.wItemID = IDS_MINUSONE;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	
+	ai.wText = IDS_SETUSES;
+	ai.wItemID = IDS_SETUSES;
+	
+	// Add the item to the menu control
+	IMENUCTL_AddItemEx( pMe->m_pIMenu, &ai );
+	
+	IMENUCTL_SetActive(pMe->m_pIMenu,TRUE);
+  // 	IMENUCTL_Redraw(pMe->m_pIMenu);
+}
+//lab 1
+static void	 myILicense_DiaplayInfo(myILicense* pMe,AECHAR* pInfo)
+{
+	AEERect rct;
+	
+	if(!pMe->m_pIStatic)
+		ISHELL_CreateInstance(pMe->pIShell, AEECLSID_STATIC, (void **)&pMe->m_pIStatic);
+	SETAEERECT(&rct, 16, 16, pMe->DeviceInfo.cxScreen-32, pMe->DeviceInfo.cyScreen-32);
+	ISTATIC_SetRect(pMe->m_pIStatic, &rct);
+	ISTATIC_SetText(pMe->m_pIStatic, NULL,pInfo, AEE_FONT_BOLD, AEE_FONT_NORMAL);
+	ISTATIC_Redraw(pMe->m_pIStatic);
+}
+// end of lab 1

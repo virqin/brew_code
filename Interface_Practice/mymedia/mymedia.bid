@@ -1,0 +1,6 @@
+#ifndef MYMEDIA_BID
+#define MYMEDIA_BID
+
+#define AEECLSID_MYMEDIA        0x90000009
+
+#endif //MYMEDIA_BID

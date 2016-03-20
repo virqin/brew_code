@@ -1,0 +1,6 @@
+#ifndef MAINAPP_BID
+#define MAINAPP_BID
+
+#define AEECLSID_MAINAPP        0x88888883
+
+#endif //MAINAPP_BID

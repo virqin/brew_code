@@ -1,0 +1,433 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\SST_F350.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\SST_F350.ico"
+IDR_PORT_DISCONNECT     ICON    DISCARDABLE     "res\\ico00001.ico"
+IDR_PORT_CONNECT        ICON    DISCARDABLE     "res\\idr_port.ico"
+IDI_ICON_SDLOAD         ICON    DISCARDABLE     "res\\icon_sdl.ico"
+IDI_ICON_REPAIR         ICON    DISCARDABLE     "res\\cy_rbemp.ico"
+IDI_ICON_DOWNLOAD       ICON    DISCARDABLE     "res\\Brainr.ico"
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "\0"
+            VALUE "FileVersion", "\0"
+            VALUE "InternalName", "\0"
+            VALUE "LegalCopyright", "\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "\0"
+            VALUE "ProductVersion", "\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_LOGO                BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
+IDB_RUNNING             BITMAP  DISCARDABLE     "res\\bitmap2.bmp"
+IDB_SEARCHING           BITMAP  DISCARDABLE     "res\\bitmap3.bmp"
+IDB_READY               BITMAP  DISCARDABLE     "res\\bmp00001.bmp"
+IDB_FAIL                BITMAP  DISCARDABLE     "res\\fail.bmp"
+IDB_PASS                BITMAP  DISCARDABLE     "res\\fail1.bmp"
+IDB_LOGOM               BITMAP  DISCARDABLE     "res\\logo2.bmp"
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 187, 138
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About SST_F350V0.00.02"
+FONT 8, "Arial", 0, 0, 0x1
+BEGIN
+    LTEXT           "SST_F350V0.00.02",IDC_STATIC,58,82,72,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2009",IDC_STATIC,64,94,60,8
+    DEFPUSHBUTTON   "OK",IDOK,68,119,50,14,WS_GROUP
+    CONTROL         144,IDC_STATIC,"Static",SS_BITMAP,0,0,187,70
+    LTEXT           "ZTE Mobile Phone Institute (Xi'an)",IDC_STATIC,49,106,
+                    87,8
+    GROUPBOX        "",IDC_STATIC,2,72,185,66,BS_FLAT,WS_EX_CLIENTEDGE
+END
+
+IDD_SST_F350_DIALOG DIALOGEX 0, 0, 305, 184
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "End User Upgrade Tool"
+FONT 8, "Arial", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "&About",IDC_BUTTON_ABOUT,260,156,34,12
+    PUSHBUTTON      "&Exit",IDC_BUTTON_EXIT,260,169,34,12
+    COMBOBOX        IDC_COMBO_COM,33,12,48,82,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Tab1",IDC_TAB_PAGE,"SysTabControl32",0x0,7,47,294,107,
+                    WS_EX_CLIENTEDGE
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH,
+                    43,157,212,10
+    CONTROL         134,IDC_STATIC_BMP,"Static",SS_BITMAP | WS_BORDER,155,9,
+                    63,21
+    GROUPBOX        "Port Select:",IDC_STATIC_CBSELECT,8,1,221,45
+    LTEXT           "Progress:",IDC_STATIC_PROGRESS,8,158,32,8
+    LTEXT           "SPC:",IDC_STATIC_PORTINFO,236,33,15,8
+    ICON            IDR_PORT_DISCONNECT,IDC_STATIC_PORT,10,23,20,20
+    LTEXT           "Com:",IDC_STATIC_CSELECT,12,13,17,8
+    CONTROL         132,IDC_STATIC,"Static",SS_BITMAP | SS_NOTIFY | 
+                    WS_BORDER,238,4,57,25
+    LTEXT           "Status:",IDC_STATIC,8,169,21,8
+    EDITTEXT        IDC_STATIC_COM,38,31,183,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    LTEXT           "",IDC_STATIC_INFO,43,171,211,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON_REFRESH,92,12,34,12
+    LTEXT           "Bound",IDC_STATIC_BSELECT2,138,89,21,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT_SPCCODE,256,32,34,12,ES_AUTOHSCROLL
+END
+
+IDD_DIALOG_DL DIALOG DISCARDABLE  0, 0, 289, 71
+STYLE WS_CHILD
+FONT 8, "Arial"
+BEGIN
+    EDITTEXT        IDC_EDIT_USERFILE_PATH,7,23,235,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    PUSHBUTTON      "&Browse...",IDC_BUTTON2,244,21,39,14
+    PUSHBUTTON      "&Start",IDC_BUTTON_START,243,45,39,14,WS_DISABLED
+    GROUPBOX        "Phone Image File:",IDC_STATIC,3,9,284,56
+END
+
+IDD_DIALOG_NV DIALOG DISCARDABLE  0, 0, 288, 83
+STYLE WS_CHILD
+FONT 8, "Arial"
+BEGIN
+    GROUPBOX        "Update PRL",IDC_STATIC,0,3,287,41
+    GROUPBOX        "Update ERI",IDC_STATIC,0,41,287,37
+    EDITTEXT        IDC_STATIC_NVPATH,3,14,240,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    PUSHBUTTON      "&Browse...",IDC_BUTTON_BKB,246,10,37,12
+    PUSHBUTTON      "&Start",IDC_BUTTON_BKS,246,24,37,12
+    EDITTEXT        IDC_STATIC_NVFILE,3,54,240,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    PUSHBUTTON      "B&rowse...",IDC_BUTTON_RSB,246,47,37,12
+    PUSHBUTTON      "S&tart",IDC_BUTTON_RSS,246,61,37,12
+    CONTROL         "Nam1",IDC_RADIO_NAM,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,55,30,38,9
+    CONTROL         "Nam2",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,97,30,38,9
+END
+
+IDD_DIALOG_REFUR DIALOG DISCARDABLE  0, 0, 288, 83
+STYLE WS_CHILD
+FONT 8, "Arial"
+BEGIN
+    PUSHBUTTON      "&Start",IDC_BUTTON_REFUR,228,51,45,15
+    LTEXT           "The refurbishment feature provides the capability to reset a phone back to a combination of factory and Service Provider specific defaults",
+                    IDC_STATIC,17,23,247,16
+    GROUPBOX        "Refurbishment",IDC_STATIC,4,7,277,69
+END
+
+IDD_DIALOG_DMU DIALOG DISCARDABLE  0, 0, 291, 69
+STYLE WS_CHILD
+FONT 8, "Arial"
+BEGIN
+    GROUPBOX        "DMU Key",IDC_STATIC,3,7,281,55
+    EDITTEXT        IDC_EDIT_DMU_PATH,4,19,234,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    PUSHBUTTON      "&Browse...",IDC_BUTTON_BROWSE,240,18,42,13
+    PUSHBUTTON      "&Start",IDC_BUTTON_START,240,42,42,13
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_SST_F350_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 182
+    END
+
+    IDD_DIALOG_NV, DIALOG
+    BEGIN
+        RIGHTMARGIN, 287
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 78
+    END
+
+    IDD_DIALOG_REFUR, DIALOG
+    BEGIN
+        RIGHTMARGIN, 281
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 76
+    END
+
+    IDD_DIALOG_DMU, DIALOG
+    BEGIN
+        RIGHTMARGIN, 284
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 62
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_SST_F350_DIALOG DLGINIT
+BEGIN
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x314d, "\000" 
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x324d, "\000" 
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x334d, "\000" 
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x344d, "\000" 
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x354d, "\000" 
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x364d, "\000" 
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x374d, "\000" 
+    IDC_COMBO_COM, 0x403, 5, 0
+0x4f43, 0x384d, "\000" 
+    0
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ABOUTBOX            "About End User Upgrade Tool(&A)..."
+    IDS_CSTRING_OK          "??"
+    IDS_ESTRING103          "OK"
+    IDS_ESTRING_ABOUT1      "SST_F350"
+    IDS_ESTRING_ABOUT2      "???? (C) 2006"
+    IDS_ESTRING_DL1         "Phone Image File"
+    IDS_ESTRING_DL2         "Boot  Image File:"
+    IDS_ESTRING_DL3         "Backup  NV  path:"
+    IDS_ESTRING_BROWSE      "Browse..."
+    IDS_ESTRING_START       "Start"
+    IDS_ESTRING_DL4         "Reserve all NV"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ESTRING_DL5         "Erase all NV"
+    IDS_ESTRING_DL6         "Only restore RF"
+    IDS_ESTRING_DL7         "Restore RF and ESN"
+    IDS_ESTRING_NV1         "Back NV file"
+    IDS_ESTRING_NV2         "File Path:"
+    IDS_ESTRING_NV3         "Restore NV file"
+    IDS_ESTRING_NV4         "Uninclude  ESN"
+    IDS_ESTRING_NV5         "Include ESN"
+    IDS_ESTRING_MAIN1       "Port and Baud rate Select"
+    IDS_ESTRING_MAIN2       "Handset Select"
+    IDS_ESTRING_MAIN3       "Bound"
+    IDS_ESTRING_MAIN4       "Com"
+    IDS_ESTRING_MAIN5       "Port:"
+    IDS_ESTRING_MAIN6       "Progress"
+    IDS_ESTRING_MAIN7       "Status"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ESTRING_ABOUT       "&About"
+    IDS_ESTRING_EXIT        "&Exit"
+    IDS_ESTRING_TABDL       "Download page"
+    IDS_ESTRING_TABNV       "NV Page"
+    IDS_STRING132           "1"
+    IDS_STRING133           "2"
+    IDS_CSTRING_DL1         "Phone Image File"
+    IDS_CSTRING_DL2         "Boot  Image File:"
+    IDS_CSTRING_DL3         "Backup  NV  path:"
+    IDS_CSTRING_BROWSE      "Browse..."
+    IDS_CSTRING_START       "Start"
+    IDS_CSTRING_DL4         "Reserve all NV"
+    IDS_CSTRING_DL5         "Erase all NV"
+    IDS_CSTRING_DL6         "Only restore RF"
+    IDS_CSTRING_DL7         "Restore RF and ESN"
+    IDS_CSTRING_NV1         "Back NV file"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CSTRING_NV2         "File Path:"
+    IDS_CSTRING_NV3         "Restore NV file"
+    IDS_CSTRING_NV4         "Uninclude  ESN"
+    IDS_CSTRING_NV5         "Include ESN"
+    IDS_CSTRING_MAIN1       "Port and Baud rate Select"
+    IDS_CSTRING_MAIN2       "Handset Select"
+    IDS_CSTRING_MAIN3       "Bound"
+    IDS_CSTRING_MAIN4       "Com"
+    IDS_CSTRING_MAIN5       "Port:"
+    IDS_CSTRING_MAIN6       "Progress"
+    IDS_CSTRING_MAIN7       "Status"
+    IDS_CSTRING_ABOUT       "&About"
+    IDS_CSTRING_EXIT        "&Exit"
+    IDS_CSTRING_TABDL       "Download page"
+    IDS_CSTRING_TABNV       "NV Page"
+END
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\SST_F350.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

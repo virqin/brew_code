@@ -1,0 +1,6 @@
+#ifndef MYFILE_BID
+#define MYFILE_BID
+
+#define AEECLSID_MYFILE        0x90000005
+
+#endif //MYFILE_BID

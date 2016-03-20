@@ -1,0 +1,6 @@
+#ifndef TRANS_BID
+#define TRANS_BID
+
+#define AEECLSID_TRANS        0x1200DF3D
+
+#endif //TRANS_BID

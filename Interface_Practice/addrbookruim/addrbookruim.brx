@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="addrbookruim" VERSION="1">
+<Strings Encoding="Unicode">
+	<String Id="10" Name="IDS_MAIN_MENU">
+		<Text>Contact Ruim</Text>
+	</String>
+	<String Id="11" Name="IDC_ADD">
+		<Text>Add</Text>
+	</String>
+	<String Id="12" Name="IDC_VIEW">
+		<Text>View</Text>
+	</String>
+	<String Id="13" Name="IDC_TOTAL_REC">
+		<Text>Total Record</Text>
+	</String>
+	<String Id="20" Name="IDS_ADD_MENU">
+		<Text>Contact Add</Text>
+	</String>
+	<String Id="21" Name="IDC_ADD_NAME">
+		<Text>名字:</Text>
+	</String>
+	<String Id="22" Name="IDC_ADD_NUM">
+		<Text>号码:</Text>
+	</String>
+	<String Id="30" Name="IDS_VIEW_MENU">
+		<Text>Contact View</Text>
+	</String>
+	<String Id="31" Name="IDS_VIEW_NO_REC">
+		<Text>No record on RUIM</Text>
+	</String>
+	<String Id="40" Name="IDC_ADD_SK">
+		<Text>Add</Text>
+	</String>
+	<String Id="50" Name="IDC_UPDATE">
+		<Text>Update</Text>
+	</String>
+	<String Id="51" Name="IDC_DELETE">
+		<Text>Delete</Text>
+	</String>
+	<String Id="60" Name="IDS_EDIT_TITLE">
+		<Text>Contact Edit</Text>
+	</String>
+	<String Id="70" Name="IDS_TOTAL_SCREEN_TITLE">
+		<Text>Total Record</Text>
+	</String>
+	<String Id="71" Name="IDS_TOTAL_REC_STR">
+		<Text>Available: </Text>
+	</String>
+	<String Id="72" Name="IDC_OK_SK">
+		<Text>OK</Text>
+	</String>
+	<String Id="80" Name="IDC_OK_PROMPT">
+		<Text>OK</Text>
+	</String>
+	<String Id="81" Name="IDS_PROMPT_TEXT_SUC">
+		<Text>Operation success</Text>
+	</String>
+	<String Id="82" Name="IDS_PROMPT_TEXT_FAIL">
+		<Text>Operation fail</Text>
+	</String>
+	<String Id="90" Name="IDC_SWITCH_STORE_DEV">
+		<Text>Switch Store Device</Text>
+	</String>
+	<String Id="91" Name="IDS_SEL_DEV_TITLE">
+		<Text>请选择存储电话薄的设备</Text>
+	</String>
+	<String Id="100" Name="IDC_SEL_DEV_HANDSET">
+		<Text>手机</Text>
+	</String>
+	<String Id="101" Name="IDC_SEL_DEV_RUIM">
+		<Text>RUIM</Text>
+	</String>
+</Strings>
+</BREWRes>

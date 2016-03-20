@@ -1,0 +1,10 @@
+
+Microsoft (R) Program Maintenance Utility   Version 6.00.8168.0
+Copyright (C) Microsoft Corp 1988-1998. All rights reserved.
+
+---------------------------------------------------------------
+CLEAN
+	del /f AEEAppGen.o AEEModGen.o common.o demo.o dlg.o dlg_demo.o ExSound.o gps.o gps_demo.o main.o media_demo.o media_demo2.o net_demo.o sms_demo.o sound.o sound_demo.o tel_demo.o text_demo.o
+	del /f D:\Brew\BREW31~1.5\sdk\examples\demo\demo.elf
+	del /f D:\Brew\BREW31~1.5\sdk\examples\demo\demo.mod
+---------------------------------------------------------------

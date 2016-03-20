@@ -1,0 +1,6 @@
+#ifndef A01_BID
+#define A01_BID
+
+#define AEECLSID_EG    	0x0106f8af
+
+#endif //A01_BID

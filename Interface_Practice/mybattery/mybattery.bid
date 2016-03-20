@@ -1,0 +1,6 @@
+#ifndef MYBATTERY_BID
+#define MYBATTERY_BID
+
+#define AEECLSID_MYBATTERY        0xDDDDDDDE
+
+#endif //MYBATTERY_BID

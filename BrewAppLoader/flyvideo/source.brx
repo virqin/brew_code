@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="source" VERSION="1">
+<Strings Encoding="UTF-8">
+	<String Id="1001" Name="IDS_APP_NAME">
+		<Text>飞影</Text>
+	</String>
+	<String Id="1002" Name="IDS_CMD_OK">
+		<Text>确定</Text>
+	</String>
+	<String Id="1003" Name="IDS_CMD_CANCEL">
+		<Text>取消</Text>
+	</String>
+</Strings>
+<Objects MimeType="image/png">
+	<Object Id="5001" Name="IDI_ASK_ICO">
+		<File>.\image\dialog_icons\ask_ico.png</File>
+	</Object>
+</Objects>
+</BREWRes>

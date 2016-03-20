@@ -1,0 +1,7 @@
+#ifndef MYCAMERA_BID
+#define MYCAMERA_BID
+
+#define AEECLSID_MYCAMERA    	0x0103b81e
+
+#endif //MYCAMERA_BID
+

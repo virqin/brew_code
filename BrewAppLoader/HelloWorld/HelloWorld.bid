@@ -1,0 +1,6 @@
+#ifndef HELLOWORLD_BID
+#define HELLOWORLD_BID
+
+#define AEECLSID_HELLOWORLD        0x44444444
+
+#endif //HELLOWORLD_BID
