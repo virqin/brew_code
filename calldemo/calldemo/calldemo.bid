@@ -1,0 +1,6 @@
+#ifndef CALLDEMO_BID
+#define CALLDEMO_BID
+
+#define AEECLSID_CALLDEMO        0x01080317
+
+#endif //CALLDEMO_BID

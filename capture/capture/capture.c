@@ -36,16 +36,16 @@
 //------------------------------------------------------------------------
 #define EVT_CAPTURE_EVENT		(EVT_USER + 500)
 
-#define MAX_UPLOAD_FILE_SIZE	1024*1024		//�ļ���С���1M
-#define MIN_STORAGE_SIZE		1024*1024*5		//�洢�ռ���С5M
+#define MAX_UPLOAD_FILE_SIZE	1024*1024		//ÎÄ¼þ´óÐ¡×î´ó1M
+#define MIN_STORAGE_SIZE		1024*1024*5		//´æ´¢¿Õ¼ä×îÐ¡5M
 
 #define RESFILE					"capture.bar"
 #define AEEFS_FILEMGR_DIR		"fs:/filemgr/"
 
-#define TITLE_HEIGHT			16	//�����
-#define BUTTON_WIDTH			39	//�˵����߶�
-#define ALERT_WIDTH				128	//��ʾͼ��λ�úͿ�
-#define ALERT_OFFSET			56	//��ʾͼ������ƫ��
+#define TITLE_HEIGHT			16	//±êÌâ¸ß
+#define BUTTON_WIDTH			39	//²Ëµ¥Ìõ¸ß¶È
+#define ALERT_WIDTH				128	//ÌáÊ¾Í¼±êÎ»ÖÃºÍ¿í
+#define ALERT_OFFSET			56	//ÌáÊ¾Í¼±ê×ø±êÆ«ÒÆ
 
 #ifdef AEE_SIMULATOR
 #define DEF_PIC_WIDTH			240
@@ -73,7 +73,7 @@
 #define MODE_PICTURE_SIZE		5
 #define MODE_STORAGE			6
 
-//�ļ����״̬
+//ÎÄ¼þä¯ÀÀ×´Ì¬
 typedef enum
 {
 	FOLDER_STATE_ROOT,
@@ -84,7 +84,7 @@ typedef enum
 } EFolderStateType;
 
 
-//�洢����
+//´æ´¢ÀàÐÍ
 typedef enum _EStorageType
 {
 	STOTAGE_PONE,
@@ -93,7 +93,7 @@ typedef enum _EStorageType
 
 
 
-//��ʾ����
+//ÌáÊ¾ÀàÐÍ
 typedef enum _EAlertType
 {
 	ALERT_LOW_MEM,
@@ -171,11 +171,11 @@ static void	   CameraApp_RemoveAll( void * pUser);
 static void	   CameraApp_ShowUpload (void * pUser);
 void		   CameraApp_ShowUploadRes( void * pUser, const boolean bRes);
 
-void		   CameraApp_DrawNotify(void *pUser, IImage *pImage, AEEImageInfo *pi, int nErr);	//��ʾͼƬ֪ͨ��Ϣ
-void		   CameraApp_ShowText(void * pUser, int16 resid, IWidget * piw, int x, int y);		//��ʾText, �ɸ���
-static void	   CameraApp_UpdateButton(void * pUser, int16 nButtonIdx, boolean bSel);			//����BUTTONͼ��״̬
+void		   CameraApp_DrawNotify(void *pUser, IImage *pImage, AEEImageInfo *pi, int nErr);	//ÏÔÊ¾Í¼Æ¬Í¨ÖªÏûÏ¢
+void		   CameraApp_ShowText(void * pUser, int16 resid, IWidget * piw, int x, int y);		//ÏÔÊ¾Text, ¿É¸´ÓÃ
+static void	   CameraApp_UpdateButton(void * pUser, int16 nButtonIdx, boolean bSel);			//¸üÐÂBUTTONÍ¼±ê×´Ì¬
 
-static void	   CameraApp_ShowAlert(void * pUser, EAlertType type);									//��ʾ��ʾ
+static void	   CameraApp_ShowAlert(void * pUser, EAlertType type);									//ÏÔÊ¾ÌáÊ¾
 
 static uint16  findPicType( const char* imagePath );
 static void    CameraApp_ShowUploadFailInfo (void * pUser, int errNo);
@@ -205,48 +205,48 @@ typedef struct _CameraApp{
 	AEERect              rcContainer;
 	IRootContainer *     pwcRoot;
 	IWidget *            piwRoot;
-	IWidget *            piwFrame;					//CameraԤ����ʾwidget
-	IWidget *            piwList;					//ͼƬ�б�
-	IWidget *            piwListPicSize;			//ͼƬ��С�б�
-	IWidget *            piwListPicQuality;			//ͼƬ�����б�
+	IWidget *            piwFrame;					//CameraÔ¤ÀÀÏÔÊ¾widget
+	IWidget *            piwList;					//Í¼Æ¬ÁÐ±í
+	IWidget *            piwListPicSize;			//Í¼Æ¬´óÐ¡ÁÐ±í
+	IWidget *            piwListPicQuality;			//Í¼Æ¬ÖÊÁ¿ÁÐ±í
 
-	IWidget *            piwImage;					//��ʾͼƬ
-	IWidget *            piwFtImage;				//�ײ�ͼƬ
-	IWidget *            piwUpImage;				//�ϴ�ͼƬ
-	IWidget *            piwButtons[NUM_BUTTONS];	//���ť
-	IWidget *			 piwProgress;				//�ϴ�������
-	IWidget *            piwTitle;					//����
-	IWidget *            piwLText;					//�����ʾ�ı�
-	IWidget *            piwMText;					//�м���ʾ�ı�
-	IWidget *            piwRText;					//�Ҳ����ʾ�ı�
-	IWidget *            piwExText;					//��ʾ�ı�
+	IWidget *            piwImage;					//ÏÔÊ¾Í¼Æ¬
+	IWidget *            piwFtImage;				//µ×²¿Í¼Æ¬
+	IWidget *            piwUpImage;				//ÉÏ´«Í¼Æ¬
+	IWidget *            piwButtons[NUM_BUTTONS];	//ÃüÁî°´Å¥
+	IWidget *			 piwProgress;				//ÉÏ´«½ø¶ÈÌõ
+	IWidget *            piwTitle;					//±êÌâ
+	IWidget *            piwLText;					//×ó²àÏÔÊ¾ÎÄ±¾
+	IWidget *            piwMText;					//ÖÐ¼äÏÔÊ¾ÎÄ±¾
+	IWidget *            piwRText;					//ÓÒ²à¼üÏÔÊ¾ÎÄ±¾
+	IWidget *            piwExText;					//ÌáÊ¾ÎÄ±¾
 
 
 	int                  nRefs;
-	int16                nActiveButton;				//��ǰ���ť
-	int16				 btnResId[NUM_BUTTONS][2];	//��ť״̬ͼ��ID
+	int16                nActiveButton;				//µ±Ç°¼¤»î°´Å¥
+	int16				 btnResId[NUM_BUTTONS][2];	//°´Å¥×´Ì¬Í¼±êID
 
-	int                  nMode;						//����ģʽ
-	int                  nPreMode;					//�ϴ�����ģʽ
-	int					 nRootMode;					//��ģʽ
+	int                  nMode;						//ÔËÐÐÄ£Ê½
+	int                  nPreMode;					//ÉÏ´ÎÔËÐÐÄ£Ê½
+	int					 nRootMode;					//¸ùÄ£Ê½
 
-	char				 szSnapDir[AEE_MAX_FILE_NAME];	//ץ��ͼƬĿ¼
-	char                 szImage[AEE_MAX_FILE_NAME];	//ץ��ͼƬ����·��
+	char				 szSnapDir[AEE_MAX_FILE_NAME];	//×¥ÅÄÍ¼Æ¬Ä¿Â¼
+	char                 szImage[AEE_MAX_FILE_NAME];	//×¥ÅÄÍ¼Æ¬ÍêÕûÂ·¾¶
 
-	int					 nQuality;					//ͼƬ����
-	AEESize				 picSize;					//ͼƬ��С
-	EStorageType		 eStorageType;				//�洢����(�ֻ���SD��)
-	EFolderStateType	 eFolderStateType;			//�ļ������״̬
+	int					 nQuality;					//Í¼Æ¬ÖÊÁ¿
+	AEESize				 picSize;					//Í¼Æ¬´óÐ¡
+	EStorageType		 eStorageType;				//´æ´¢ÀàÐÍ(ÊÖ»ú»òSD¿¨)
+	EFolderStateType	 eFolderStateType;			//ÎÄ¼þ¼Ðä¯ÀÀ×´Ì¬
 
-	int					 nPreIndex;					//�ϴ�ѡ�������
-	int					 nRetryCount;				//��ͼƬ���Դ���
-	boolean				 bUploading;				//�����ϴ�
-	boolean				 bUploadRes;				//�����ϴ�
-	boolean				 bSnaping;					//��������
-	boolean				 bStartSuccess;			    //����������Ƿ�ɹ�
+	int					 nPreIndex;					//ÉÏ´ÎÑ¡ÔñµÄË÷Òý
+	int					 nRetryCount;				//´ò¿ªÍ¼Æ¬³¢ÊÔ´ÎÊý
+	boolean				 bUploading;				//ÕýÔÚÉÏ´«
+	boolean				 bUploadRes;				//ÕýÔÚÉÏ´«
+	boolean				 bSnaping;					//ÕýÔÚÅÄÕÕ
+	boolean				 bStartSuccess;			    //Æô¶¯ÕÕÏà»úÊÇ·ñ³É¹¦
 
-	IWidget *            piwErrorImage ;			//����ʧ��ʱ��ʾ��������ͼƬ
-	IWidget *            piwErrorText;				//����ʧ��ʱ��ʾ����������ʾ
+	IWidget *            piwErrorImage ;			//Æô¶¯Ê§°ÜÊ±ÏÔÊ¾Æô¶¯´íÎóÍ¼Æ¬
+	IWidget *            piwErrorText;				//Æô¶¯Ê§°ÜÊ±ÌáÊ¾Æô¶¯´íÎóÌáÊ¾
 
 }CameraApp;
 
@@ -377,7 +377,7 @@ void ShowSubFiles(void * pUser, const char* dir, IVectorModel *piListModel)
 	{
 		char *fileName = STRRCHR(fi.szName, '/') + 1;
 
-		//����Ƿ�Ϊ֧�ֵ�ͼ���ʽ
+		//¼ì²éÊÇ·ñÎªÖ§³ÖµÄÍ¼Ïñ¸ñÊ½
 		if (findPicType(fileName) != 0)
 		{
 			DBGPRINTF("Dir:%s %s", fi.szName, fileName);
@@ -450,7 +450,7 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 
 
 #if 0
-				//��ʾ��γ��[����ʹ��]
+				//ÏÔÊ¾¾­Î³¶È[²âÊÔÊ¹ÓÃ]
 				{
 					int size = 0;
 					char locInfo[40];
@@ -469,13 +469,13 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 		
 		DBGPRINTF("EVT_KEY: %x", wParam);
 
-		//��PTT���͹ػ������˳����ճ���
+		//°´PTT¼üºÍ¹Ø»ú¼ü¶¼ÍË³öÅÄÕÕ³ÌÐò
 		if (G500_AVK_PTT == wParam || AVK_END == wParam)
 		{
 			ISHELL_CloseApplet((IShell*)me->piShell, FALSE);
 		}
 
-		//add by yao �����ϴ�
+		//add by yao ´¦ÀíÉÏ´«
 		if (me->nMode == MODE_VIEWING) 
 		{
 			if (AVK_SELECT == wParam)
@@ -494,7 +494,7 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 			}
 			else if (AVK_SOFT2 == wParam)
 			{
-				//�����ϴ����̿���ȡ��
+				//ÕýÔÚÉÏ´«¹ý³Ì¿ÉÒÔÈ¡Ïû
 				if (me->bUploading)
 				{
 					CScs_CancelUpload(me->scs);
@@ -504,7 +504,7 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 			}
 		}
 		
-		//��������ֵ
+		//´¦Àí·µ»ØÖµ
 		if (AVK_SOFT2 == wParam)
 		{
 			if(me->bStartSuccess == FALSE)
@@ -557,10 +557,10 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 			return TRUE;
 		}
 		
-		//�ļ����
+		//ÎÄ¼þä¯ÀÀ
 		if (me->nMode == MODE_SELECTING) 
 		{
-			//����
+			//·µ»Ø
 			if (AVK_SOFT2 == wParam)
 			{
 				if (me->eFolderStateType == FOLDER_STATE_UPLOADING)
@@ -603,12 +603,12 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 					}
 					else
 					{
-						//Ŀ¼Ϊ��
+						//Ä¿Â¼Îª¿Õ
 						return 0;
 					}
 
 
-					//��Ŀ¼���ж��Ƿ����
+					//¸ùÄ¿Â¼ÔòÅÐ¶ÏÊÇ·ñ´æÔÚ
 					if (me->eFolderStateType == FOLDER_STATE_ROOT)
 					{
 						switch (nIndex)
@@ -639,7 +639,7 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 							SNPRINTF(szPath, sizeof(szPath), "%simage/My Photo/%s", AEEFS_CARD0_DIR, szSection);
 						}
 						
-						me->nPreIndex = nIndex;	//��¼�ϴε�����
+						me->nPreIndex = nIndex;	//¼ÇÂ¼ÉÏ´ÎµÄË÷Òý
 
 						me->eFolderStateType = FOLDER_STATE_VIEWING;
 						STRCPY(me->szImage, szPath);
@@ -653,7 +653,7 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 				IWIDGET_HandleEvent(me->piwList, eCode, wParam, dwParam);
 			}
 		}
-		else if (me->nMode == MODE_STORAGE)			//�洢λ��
+		else if (me->nMode == MODE_STORAGE)			//´æ´¢Î»ÖÃ
 		{		
 			if (AVK_SELECT == wParam || AVK_SOFT1 == wParam) 
 			{
@@ -725,7 +725,7 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 				IWIDGET_HandleEvent(me->piwList, eCode, wParam, dwParam);
 			}
 		}
-		else if (me->nMode == MODE_PICTURE_QUALITY)		//����ͼƬ����
+		else if (me->nMode == MODE_PICTURE_QUALITY)		//ÉèÖÃÍ¼Æ¬ÖÊÁ¿
 		{
 			if (AVK_SELECT == wParam || AVK_SOFT1 == wParam)
 			{		
@@ -777,7 +777,7 @@ static boolean CameraApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam
 				IWIDGET_HandleEvent(me->piwListPicQuality, eCode, wParam, dwParam);
 			}
 		}
-		else if (me->nMode == MODE_PICTURE_SIZE)	//����ͼƬ��С
+		else if (me->nMode == MODE_PICTURE_SIZE)	//ÉèÖÃÍ¼Æ¬´óÐ¡
 		{
 			if (AVK_SELECT == wParam || AVK_SOFT1 == wParam)
 			{
@@ -950,7 +950,7 @@ static void CameraApp_ShowSnap(void * pUser, const char* imagePath)
 	me->bUploadRes = FALSE;
 
 	//////////////////////////////////////////////////////////////////////////
-	//NEW_ISSUE �����ļ���СУ��, ��������趨��С����ʾ����
+	//NEW_ISSUE Ìí¼ÓÎÄ¼þ´óÐ¡Ð£Ñé, Èç¹û³¬¹ýÉè¶¨´óÐ¡ÔòÌáÊ¾´íÎó
 	nErr = IFILEMGR_GetInfo(me->piFileMgr, me->szImage, &pi);
 	if (pi.dwSize > MAX_UPLOAD_FILE_SIZE)
 	{
@@ -973,10 +973,10 @@ static void CameraApp_ShowPreview(void * pUser)
 	CameraApp *me = (CameraApp *)pUser;
 	int nMode = 0;
 
-	//�趨ץ��ͼƬ��С
+	//Éè¶¨×¥ÅÄÍ¼Æ¬´óÐ¡
 	nErr = ICAMERA_SetSize(me->piCamera, &me->picSize);
 
-	//�趨Ԥ��
+	//Éè¶¨Ô¤ÀÀ
 	nErr = ICAMERA_Preview(me->piCamera);
 	
 	me->nPreMode = me->nMode;
@@ -1011,7 +1011,7 @@ static void CameraApp_Capture (void * pUser)
 
 #ifndef AEE_SIMULATOR
 	//////////////////////////////////////////////////////////////////////////
-	//NEW_ISSUE �����ڴ�ʣ��ռ�У�����ʾ, ���ڴ�ռ�����趨�Ŀռ�ʱ��ʾ
+	//NEW_ISSUE Ìí¼ÓÄÚ´æÊ£Óà¿Õ¼äÐ£ÑéºÍÌáÊ¾, µ±ÄÚ´æ¿Õ¼äµÍÓÚÉè¶¨µÄ¿Õ¼äÊ±ÌáÊ¾
 	{
 		int nErr = 0;
 		uint32 dwTotal = 0;
@@ -1256,7 +1256,7 @@ static void	   CameraApp_ShowPicSize( void * pUser)
 	me->nMode = MODE_PICTURE_SIZE;
 	me->nRootMode = MODE_PICTURE_SIZE;
 	
-	//���ݵ�ǰ��¼�ߴ��趨ѡ�����Ŀ
+	//¸ù¾Ýµ±Ç°¼ÇÂ¼³ß´çÉè¶¨Ñ¡ÔñµÄÌõÄ¿
 	if (me->picSize.cx == 240)
 	{
 		index = 0;
@@ -1376,7 +1376,7 @@ void CameraApp_ShowUploadRes (void * pUser, const boolean bRes)
 		RELEASEIF(piImage);
 	}
 
-	//!!��ʱע���Զ�����ǰһ��ҳ��!!
+	//!!ÔÝÊ±×¢µô×Ô¶¯·µ»ØÇ°Ò»¸öÒ³Ãæ!!
 // 	if (me->nRootMode == MODE_SELECTING)
 // 	{
 // 		ISHELL_SetTimer(me->piShell, UPLOAD_TIMER, CameraApp_ShowFolderList, (void*)me);
@@ -1391,8 +1391,8 @@ void CameraApp_ShowUploadRes (void * pUser, const boolean bRes)
 // 		ISHELL_SetTimer(me->piShell, UPLOAD_TIMER, CameraApp_ShowPreview, (void*)me);
 // 	}
 
-	me->bUploadRes = bRes;	//��¼�ϴ����ֵ
-	me->bUploading = FALSE;	//��¼�ϴ�״̬
+	me->bUploadRes = bRes;	//¼ÇÂ¼ÉÏ´«½á¹ûÖµ
+	me->bUploading = FALSE;	//¼ÇÂ¼ÉÏ´«×´Ì¬
 }
 
 
@@ -1438,7 +1438,7 @@ static void CameraApp_ShowUploadFailInfo (void * pUser, int errNo)
 		RELEASEIF(piImage);
 	}
 
-	//!!��ʱע���Զ�����ǰһ��ҳ��!!
+	//!!ÔÝÊ±×¢µô×Ô¶¯·µ»ØÇ°Ò»¸öÒ³Ãæ!!
 	// 	if (me->nRootMode == MODE_SELECTING)
 	// 	{
 	// 		ISHELL_SetTimer(me->piShell, UPLOAD_TIMER, CameraApp_ShowFolderList, (void*)me);
@@ -1453,8 +1453,8 @@ static void CameraApp_ShowUploadFailInfo (void * pUser, int errNo)
 	// 		ISHELL_SetTimer(me->piShell, UPLOAD_TIMER, CameraApp_ShowPreview, (void*)me);
 	// 	}
 
-	me->bUploadRes = FALSE;	//��¼�ϴ����ֵ
-	me->bUploading = FALSE;	//��¼�ϴ�״̬
+	me->bUploadRes = FALSE;	//¼ÇÂ¼ÉÏ´«½á¹ûÖµ
+	me->bUploading = FALSE;	//¼ÇÂ¼ÉÏ´«×´Ì¬
 }
 
 
@@ -1520,7 +1520,7 @@ void CameraApp_DrawNotify(void *pUser, IImage *pImage, AEEImageInfo *pi, int nEr
 			IROOTCONTAINER_InsertEx(me->pwcRoot, me->piwImage, 0, 0);
 		}
 		
-		//��ʾ �ϴ� ����ʱ�����Ͳ�ѯ��γ�Ⱥ�uid����Ϣ
+		//ÏÔÊ¾ ÉÏ´« ½çÃæÊ±£¬·¢ËÍ²éÑ¯¾­Î³¶ÈºÍuidµÄÏûÏ¢
 		ISHELL_PostEvent(me->piShell, AEECLSID_SLPTT, EVT_CAPTURE_EVENT, STRLEN(CAPTURE_EVENT_MSG), CAPTURE_EVENT_MSG);
     }
 	else
@@ -1602,7 +1602,7 @@ static void CameraApp_UpdateButton(void * pUser, int16 nButtonIdx, boolean bSel)
 	RELEASEIF(piImage);
 }
 
-//��ʾ��ʾ��Ϣ
+//ÏÔÊ¾ÌáÊ¾ÐÅÏ¢
 static void CameraApp_ShowAlert(void *pUser, EAlertType type)
 {
 	CameraApp *me = (CameraApp *)pUser;
@@ -1619,14 +1619,14 @@ static void CameraApp_ShowAlert(void *pUser, EAlertType type)
 
 	switch (type)
 	{
-	case ALERT_LOW_MEM:	//�ڴ治��
+	case ALERT_LOW_MEM:	//ÄÚ´æ²»×ã
 
 		CameraApp_ShowText(me, IDS_STRING_ALERT_MEM_SIZE1, me->piwLText, me->rcContainer.dx / 3 + 5, ALERT_WIDTH+ALERT_OFFSET);
 		CameraApp_ShowText(me, IDS_STRING_ALERT_MEM_SIZE2, me->piwMText, me->rcContainer.dx / 3 - 12, ALERT_WIDTH+ALERT_OFFSET + 20);
 		CameraApp_ShowText(me, IDS_STRING_RETURN, me->piwRText, me->rcContainer.dx - 40, me->rcContainer.dy - BUTTON_WIDTH + 10);
 		break;
 
-	case ALERT_BIG_FILE://�ļ�̫��
+	case ALERT_BIG_FILE://ÎÄ¼þÌ«´ó
 
 		CameraApp_ShowText(me, IDS_STRING_ALERT_FILE_SIZE1, me->piwLText, me->rcContainer.dx / 3 - 10, ALERT_WIDTH+ALERT_OFFSET);
 		CameraApp_ShowText(me, IDS_STRING_ALERT_FILE_SIZE2, me->piwMText, me->rcContainer.dx / 3 - 10, ALERT_WIDTH+ALERT_OFFSET + 20);
@@ -2162,7 +2162,7 @@ static int CameraApp_Construct(CameraApp *me, IModule * piModule, IShell * piShe
 		IVECTORMODEL_SetPfnFree(me->piListModelPicSize, WidgetAEEFree);
 	}
 
-	//�������ñ��浽SD��, ���SD����������ʹ���ļ�����Ŀ¼	
+	//ÓÅÏÈÅäÖÃ±£´æµ½SD¿¨, Èç¹ûSD¿¨²»´æÔÚÔòÊ¹ÓÃÎÄ¼þ¹ÜÀíÄ¿Â¼	
 	if (SUCCESS == IFILEMGR_Test(me->piFileMgr, AEEFS_CARD0_DIR))
 	{
 		me->eStorageType = STOTAGE_SDCARD;

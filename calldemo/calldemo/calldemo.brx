@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="calldemo" VERSION="1">
+<Strings Encoding="Unicode">
+	<String Id="1001" Name="IDS_MO_TEXT_UNICODE">
+		<Text>你的朋友向你推荐手机游戏－数独，你可从软件超市下载</Text>
+	</String>
+	<String Id="1002" Name="IDS_STRING_TELEPHONE_NUMBER">
+		<Text>15511823090</Text>
+		<Comment>15511823090</Comment>
+	</String>
+	<String Id="1003" Name="IDS_STRING_TELEPHONE_NUMBER_MAIN">
+		<Text>85289460</Text>
+		<Comment>总机</Comment>
+	</String>
+	<String Id="1004" Name="IDS_STRING_TELEPHONE_NUMBER_SUB">
+		<Text>683</Text>
+		<Comment>分机</Comment>
+	</String>
+	<String Id="1005" Name="IDS_STRING_TELEPHONE_NUMBER_A">
+		<Text>15511823090</Text>
+	</String>
+	<String Id="1006" Name="IDS_STRING_TELEPHONE_NUMBER_B">
+		<Text>15511823090</Text>
+	</String>
+	<String Id="1007" Name="IDS_STRING_TELEPHONE_NUMBER_REDIRECT">
+		<Text>15511823090</Text>
+		<Comment>redirect number</Comment>
+	</String>
+</Strings>
+</BREWRes>

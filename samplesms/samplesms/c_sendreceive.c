@@ -1291,7 +1291,6 @@ void c_samplesms_SendSMS(CSampleSMS *pMe) {
    CALLBACK_Cancel(&pMe->m_callback);
    CALLBACK_Init(&pMe->m_callback, (PFNNOTIFY)c_samplesms_SendSMSCB, pMe);
    ISMS_SendMsg(pMe->m_pISMS, pMe->m_pISMSMsg, &pMe->m_callback, &pMe->m_retVal);
-   
 }
 
 /*===========================================================================
@@ -1302,7 +1301,7 @@ DESCRIPTION
    The procedure is continued with storing a message tagged as a sent message
    
 PROTOTYPE:
-   void c_samplesms_SendSMSCB(CSampleSMS * pi);
+   void CSampleSMS * pi);
 ===========================================================================*/
 void c_samplesms_SendSMSCB(CSampleSMS *pMe) {
    uint16 errType = AEESMS_GETERRORTYPE(pMe->m_retVal);
