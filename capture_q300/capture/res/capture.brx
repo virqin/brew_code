@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BREWRes Name="capture" VERSION="1">
+<Strings Encoding="Unicode">
+	<String Id="1001" Name="IDS_STRING_HIGH" Encoding="Unicode">
+		<Text>高</Text>
+	</String>
+	<String Id="1002" Name="IDS_STRING_MIDDLE" Encoding="Unicode">
+		<Text>中</Text>
+	</String>
+	<String Id="1003" Name="IDS_STRING_LOW" Encoding="Unicode">
+		<Text>低</Text>
+	</String>
+	<String Id="1004" Name="IDS_STRING_SIZE1" Encoding="Unicode">
+		<Text>240*320</Text>
+	</String>
+	<String Id="1005" Name="IDS_STRING_SIZE2" Encoding="Unicode">
+		<Text>480*640</Text>
+	</String>
+	<String Id="1006" Name="IDS_STRING_SIZE3" Encoding="Unicode">
+		<Text>600*800</Text>
+	</String>
+	<String Id="1007" Name="IDS_STRING_SIZE4" Encoding="Unicode">
+		<Text>960*1280</Text>
+	</String>
+	<String Id="1008" Name="IDS_STRING_QUALITY" Encoding="Unicode">
+		<Text>图片质量</Text>
+	</String>
+	<String Id="1009" Name="IDS_STRING_SIZE" Encoding="Unicode">
+		<Text>图片大小</Text>
+	</String>
+	<String Id="1010" Name="IDS_STRING_STORAGE" Encoding="Unicode">
+		<Text>存储位置</Text>
+	</String>
+	<String Id="1011" Name="IDS_STRING_FOLDER" Encoding="Unicode">
+		<Text>文件管理器</Text>
+	</String>
+	<String Id="1012" Name="IDS_STRING_PIC" Encoding="Unicode">
+		<Text>图片</Text>
+	</String>
+	<String Id="1013" Name="IDS_STRING_SELECT" Encoding="Unicode">
+		<Text>选择</Text>
+	</String>
+	<String Id="1014" Name="IDS_STRING_UPLOAD" Encoding="Unicode">
+		<Text>上传</Text>
+	</String>
+	<String Id="1015" Name="IDS_STRING_RETURN" Encoding="Unicode">
+		<Text>返回</Text>
+	</String>
+	<String Id="1016" Name="IDS_STRING_SET" Encoding="Unicode">
+		<Text>设定</Text>
+	</String>
+	<String Id="1017" Name="IDS_STRING_UPLOADING" Encoding="Unicode">
+		<Text>图片上传中...</Text>
+	</String>
+	<String Id="1018" Name="IDS_STRING_UPLOAD_SUCCESS" Encoding="Unicode">
+		<Text>上传成功</Text>
+	</String>
+	<String Id="1019" Name="IDS_STRING_UPLOAD_FAILED" Encoding="Unicode">
+		<Text>上传失败</Text>
+	</String>
+	<String Id="1020" Name="IDS_STRING_PHONE" Encoding="Unicode">
+		<Text>手机</Text>
+	</String>
+	<String Id="1021" Name="IDS_STRING_SDCARD" Encoding="Unicode">
+		<Text>存储卡</Text>
+	</String>
+	<String Id="1022" Name="IDS_STRING_ALERT_FILE_SIZE1" Encoding="Unicode">
+		<Text>图片大于1M</Text>
+	</String>
+	<String Id="1023" Name="IDS_STRING_ALERT_FILE_SIZE2" Encoding="Unicode">
+		<Text>请重新选择</Text>
+	</String>
+	<String Id="1024" Name="IDS_STRING_ALERT_MEM_SIZE1" Encoding="Unicode">
+		<Text>内存已满</Text>
+	</String>
+	<String Id="1025" Name="IDS_STRING_ALERT_MEM_SIZE2" Encoding="Unicode">
+		<Text>请清理后重试</Text>
+	</String>
+	<String Id="1029" Name="IDS_STRING_ALERT_UNSUPPORTED" Encoding="Unicode">
+		<Text>不支持的格式文件</Text>
+	</String>
+	<String Id="1030" Name="IDS_STRING_UID_NOT_GET" Encoding="Unicode">
+		<Text>账号获取失败</Text>
+	</String>
+	<String Id="1031" Name="IDS_STRING_SCS_INI_NOT_FOUND" Encoding="Unicode">
+		<Text>INI未配置</Text>
+	</String>
+	<String Id="1032" Name="IDS_STRING_CAMERA_ERROR" Encoding="Unicode">
+		<Text>无法启动</Text>
+	</String>
+</Strings>
+
+<Objects MimeType="image/png">
+	<Object Id="5030" Name="IDB_CAPTURE">
+		<File>idb_snap.png</File>
+	</Object>
+	<Object Id="5031" Name="IDB_CAPTURE_SEL">
+		<File>idb_snap_sel.png</File>
+	</Object>
+	<Object Id="5032" Name="IDB_PICTURE_QUALITY">
+		<File>idb_picture_quality.png</File>
+	</Object>
+	<Object Id="5033" Name="IDB_PICTURE_QUALITY_SEL">
+		<File>idb_picture_quality_sel.png</File>
+	</Object>
+	<Object Id="5034" Name="IDB_PICTURE_SIZE">
+		<File>idb_picture_size.png</File>
+	</Object>
+	<Object Id="5035" Name="IDB_PICTURE_SIZE_SEL">
+		<File>idb_picture_size_sel.png</File>
+	</Object>
+	<Object Id="5036" Name="IDB_STORAGE">
+		<File>idb_storage.png</File>
+	</Object>
+	<Object Id="5037" Name="IDB_STORAGE_SEL">
+		<File>idb_storage_sel.png</File>
+	</Object>
+	<Object Id="5038" Name="IDB_FOLDER">
+		<File>idb_folder.png</File>
+	</Object>
+	<Object Id="5039" Name="IDB_FOLDER_SEL">
+		<File>idb_folder_sel.png</File>
+	</Object>
+	<Object Id="5040" Name="IDB_SUCCESS">
+		<File>idb_success.png</File>
+	</Object>
+	<Object Id="5041" Name="IDB_FAILED">
+		<File>idb_failed.png</File>
+	</Object>
+	<Object Id="5042" Name="IDB_UPLOAD">
+		<File>idb_upload.png</File>
+	</Object>
+	<Object Id="5043" Name="IDB_ALERT">
+		<File>idb_alert.png</File>
+	</Object>
+	<Object Id="5044" Name="IDB_CAMAREA">
+		<File>idb_cam.png</File>
+	</Object>
+</Objects>
+
+<Objects MimeType="image/bmp">
+	<Object Id="5004" Name="IDB_FOLDER_BG">
+		<File>idb_folder_bg.bmp</File>
+	</Object>
+	<Object Id="5005" Name="IDB_STORAGE_BG">
+		<File>idb_storage_bg.bmp</File>
+	</Object>
+</Objects>
+</BREWRes>
